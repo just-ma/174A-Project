@@ -22,6 +22,9 @@ class Scene extends Scene_Component
           }
 
         this.lights = [ new Light( Vec.of( -2,2,0,1 ), Color.of( 0,0,1,1 ), 0 ) ];
+        
+        // Camera
+        this.zoom_out_base_constant = 20;
 
         // Ball (moving)
         this.x = 0; // current x pos
@@ -43,18 +46,19 @@ class Scene extends Scene_Component
         // Piston
         this.piston_pos = 0; // current piston position
         this.piston_t = 0;   // piston time used for animation
+        this.piston_vec = Vec.of(0,0,0);
 
         // Map Objects (static)
         this.map_objs = [
-            //                         (position)           (sccale)
-            new Map_GameObject(Vec.of( 0, -3, -4 ), Vec.of( 5, 1, 2 )),
-            new Map_GameObject(Vec.of( 3, 0, -4 ), Vec.of( 1, 5, 2 )),
+            //                         (position)           (scale)
+            new Map_GameObject(Vec.of( 0, -4, -4 ), Vec.of( 10, 1, 2 )),
+            new Map_GameObject(Vec.of( -8, 0, -4 ), Vec.of( 1, 5, 2 )),
         ] 
         // Piston Objects (static)
         this.piston_objs = [
-            //                           (position)     (rotation)
-            new Piston_GameObject(Vec.of( 2, 0, -4 ), Math.PI / 6),
-            new Piston_GameObject(Vec.of( -6, 3, -4 ), -Math.PI / 2)
+            //                           (position)     (rotation)  (power)
+            new Piston_GameObject(Vec.of( 6, 0, -4 ), Math.PI / 3,    20),
+            new Piston_GameObject(Vec.of( -6, 3, -4 ), -Math.PI / 2,  15)
 
         ]
 
@@ -63,6 +67,8 @@ class Scene extends Scene_Component
     // Piston Functions
     piston_push(){
         this.piston_t = 10;
+        this.add_force(this.piston_vec);
+        console.log("tried pushing "+this.piston_vec);
     }
     piston_function( x ){
         if (x > 6){
@@ -101,7 +107,14 @@ class Scene extends Scene_Component
             this.velocity = 0;
     }
     check_collision(map_obj, ball_max_x, ball_min_x, ball_max_y, ball_min_y, ball_vel_x, ball_vel_y, ball_vel_mag)
-      { 
+      { /*
+        if (this.y < -2){
+            this.velocity[0] *= 0.8;
+            this.velocity[1] *= -0.8;
+            this.y = -2;
+            this.add_force( Vec.of(0,0,0) );
+        }*/
+
         var dont_flip_x_dir_sign = 1; // 1 means don't flip
         var dont_flip_y_dir_sign = 1; // 1 means don't flip
         
@@ -111,7 +124,6 @@ class Scene extends Scene_Component
         var left_overlap = (ball_min_x < map_obj.max_x && ball_min_x > map_obj.min_x);
         var right_overlap = (ball_max_x < map_obj.max_x && ball_max_x > map_obj.min_x);
        
-        
         
         // BOUNCE REVERSE: Checking for FULL OVERLAP of ball inside map platform
         if (bottom_overlap && top_overlap && right_overlap && left_overlap)
@@ -167,6 +179,14 @@ class Scene extends Scene_Component
             this.add_force( Vec.of(0,0,0) ); // Update current movement with our new velocity
         }
       }  
+    check_piston_collision(piston_obj, ball_max_x, ball_min_x, ball_max_y, ball_min_y)
+      { if (ball_min_y < piston_obj.center[1]+1 && ball_max_y > piston_obj.center[1]-1 && 
+            ball_min_x < piston_obj.center[0]+1 && ball_max_x > piston_obj.center[0]-1){
+            this.piston_vec = piston_obj.direction;
+        } else {
+            this.piston_vec = Vec.of(0,0,0);
+        }
+      }  
     check_all_collisions()
       {
         var ball_vel_x = this.velocity[0];
@@ -179,8 +199,6 @@ class Scene extends Scene_Component
         var ball_min_x = this.x - this.ball_radius;
         var ball_max_y = this.y + this.ball_radius;
         var ball_min_y = this.y - this.ball_radius;
-
-        
         
         var collided = false;
         
@@ -192,6 +210,12 @@ class Scene extends Scene_Component
             if (collided)
              break;
          }
+        for (i = 0; i < this.piston_objs.length; i++)
+        {
+            this.check_piston_collision(this.piston_objs[i], ball_max_x, ball_min_x, ball_max_y, ball_min_y);
+            if (this.piston_vec[0] != 0 && this.piston_vec[1] != 0)
+                break;
+        }
       }
     //////////////////////////////////////////////////////////
     // Buttons
@@ -226,7 +250,7 @@ class Scene extends Scene_Component
     update_camera(graphics_state, ball_transform)
       {
         graphics_state.camera_transform = Mat4.look_at( Vec.of( ball_transform[0][3], ball_transform[1][3], ball_transform[2][3] 
-                                                                + 10 + Math.abs(this.velocity[0])/2 ), 
+                                                                + this.zoom_out_base_constant + Math.abs(this.velocity[0])/2 ), 
                                                         Vec.of( ball_transform[0][3], ball_transform[1][3], ball_transform[2][3] ), 
                                                         Vec.of( 0,1,0 ) )
                                                         .map( (x,i) => Vec.from( graphics_state.camera_transform[i] ).mix( x, 0.05 ) );
@@ -234,15 +258,15 @@ class Scene extends Scene_Component
     //////////////////////////////////////////////////////////
     // Update Frame Loop
     display( graphics_state )
-      { 
+      { graphics_state.lights = this.lights;
         const t = graphics_state.animation_time / 1000, dt = graphics_state.animation_delta_time / 1000;
-        
+
         //set new positions
         this.run_newtonian_physics(t);
 
         //check for collisions 
         this.check_all_collisions();
-        
+
         // Put light inside ball 
         graphics_state.lights = [ new Light( Vec.of( this.x,this.y,this.z,1 ), Color.of( 1,0,0,1 ), 1000) , this.lights[0] ];
         
