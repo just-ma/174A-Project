@@ -17,17 +17,10 @@ class Map_GameObject
 }
 
 class Piston_GameObject
-{ constructor(position, rotation)
+{ constructor(position, rotation, power)
     {
-      this.center = Vec.of(position[0] + Math.cos(rotation), position[1] - Math.sin(rotation), position[2]);
-      this.center_origin = position;
-      this.max_x = this.center[0] + 1 + Math.cos(rotation);
-      this.min_x = this.center[0] - 1 + Math.cos(rotation);
-      this.max_y = this.center[1] + 1 - Math.sin(rotation);
-      this.min_y = this.center[1] - 1 - Math.sin(rotation);
-      
-      this.detect_radius = 2;
-
+      this.center = Vec.of(position[0] - 2 * Math.sin(rotation), position[1] + 2 * Math.cos(rotation), position[2]);
+      this.direction = Vec.of(-1* power * Math.sin(rotation), power * Math.cos(rotation),0);
       this.model_transform = Mat4.identity()
                               .times( Mat4.translation(position) )
                               .times( Mat4.rotation( rotation , Vec.of( 0,0,1 )) );

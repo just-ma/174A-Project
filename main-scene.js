@@ -41,18 +41,19 @@ class Scene extends Scene_Component
         // Piston
         this.piston_pos = 0; // current piston position
         this.piston_t = 0;   // piston time used for animation
+        this.piston_vec = Vec.of(0,0,0);
 
         // Map Objects (static)
         this.map_objs = [
-            //                         (position)           (sccale)
-            new Map_GameObject(Vec.of( 0, -3, -4 ), Vec.of( 5, 1, 2 )),
-            new Map_GameObject(Vec.of( 3, 0, -4 ), Vec.of( 1, 5, 2 )),
+            //                         (position)           (scale)
+            new Map_GameObject(Vec.of( 0, -4, -4 ), Vec.of( 10, 1, 2 )),
+            new Map_GameObject(Vec.of( -8, 0, -4 ), Vec.of( 1, 5, 2 )),
         ] 
         // Piston Objects (static)
         this.piston_objs = [
-            //                           (position)     (rotation)
-            new Piston_GameObject(Vec.of( 2, 0, -4 ), Math.PI / 6),
-            new Piston_GameObject(Vec.of( -6, 3, -4 ), -Math.PI / 2)
+            //                           (position)     (rotation)  (power)
+            new Piston_GameObject(Vec.of( 6, 0, -4 ), Math.PI / 3,    20),
+            new Piston_GameObject(Vec.of( -6, 3, -4 ), -Math.PI / 2,  15)
 
         ]
 
@@ -61,6 +62,8 @@ class Scene extends Scene_Component
     // Piston Functions
     piston_push(){
         this.piston_t = 10;
+        this.add_force(this.piston_vec);
+        console.log("tried pushing "+this.piston_vec);
     }
     piston_function( x ){
         if (x > 6){
@@ -171,6 +174,14 @@ class Scene extends Scene_Component
             this.add_force( Vec.of(0,0,0) ); // Update current movement with our new velocity
         }
       }  
+    check_piston_collision(piston_obj, ball_max_x, ball_min_x, ball_max_y, ball_min_y)
+      { if (ball_min_y < piston_obj.center[1]+1 && ball_max_y > piston_obj.center[1]-1 && 
+            ball_min_x < piston_obj.center[0]+1 && ball_max_x > piston_obj.center[0]-1){
+            this.piston_vec = piston_obj.direction;
+        } else {
+            this.piston_vec = Vec.of(0,0,0);
+        }
+      }  
     check_all_collisions()
       {
         var ball_vel_x = this.velocity[0];
@@ -194,6 +205,12 @@ class Scene extends Scene_Component
             if (collided)
              break;
          }
+        for (i = 0; i < this.piston_objs.length; i++)
+        {
+            this.check_piston_collision(this.piston_objs[i], ball_max_x, ball_min_x, ball_max_y, ball_min_y);
+            if (this.piston_vec[0] != 0 && this.piston_vec[1] != 0)
+                break;
+        }
       }
     //////////////////////////////////////////////////////////
     // Buttons
