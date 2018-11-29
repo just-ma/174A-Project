@@ -16,10 +16,15 @@ class Scene extends Scene_Component
         this.submit_shapes( context, shapes );
 
         this.materials =
-          { phong: context.get_instance( Phong_Shader ).material( Color.of( 1,1,0,1 ) )
+          { phong: context.get_instance( Phong_Shader ).material( Color.of( 0.7,0,0,1 ), {ambient:0.05}, { specular:1.0 } ),
+            ball_redGlow_phong: context.get_instance( Phong_Shader ).material( Color.of( 1,0,0,1 ), {ambient:1.0}, { diffuse:0.0 }, { specular:0.0 } ),
+            box_blueGlow_phong: context.get_instance( Phong_Shader ).material( Color.of( 0,0.5,0.5,1 ), {ambient:0.15}, { diffuse:0.0 }, { specular:1.0 } ),
           }
 
-        this.lights = [ new Light( Vec.of( -2,2,2,1 ), Color.of( 0,1,1,1 ), 100000 ) ];
+        this.lights = [ new Light( Vec.of( -2,2,0,1 ), Color.of( 0,0,1,1 ), 0 ) ];
+        
+        // Camera
+        this.zoom_out_base_constant = 20;
 
         // Ball (moving)
         this.x = 0; // current x pos
@@ -129,7 +134,7 @@ class Scene extends Scene_Component
           }
         // BOUNCE to UP: Bottom of ball is overlapping
         if (bottom_overlap && !top_overlap && ball_vel_y < 0 &&
-            ((ball_max_x < map_obj.max_x && ball_max_x > map_obj.min_x) || (ball_min_x < map_obj.max_x && ball_min_x > map_obj.min_x))) // checking within x-range
+            ((ball_max_x + 0.1 < map_obj.max_x && ball_max_x - 0.1 > map_obj.min_x) || (ball_min_x + 0.1 < map_obj.max_x && ball_min_x - 0.1 > map_obj.min_x))) // checking within x-range
           {
             dont_flip_x_dir_sign = 1;
             dont_flip_y_dir_sign = -1;
@@ -235,17 +240,17 @@ class Scene extends Scene_Component
 
         for (i = 0; i < piston_objs.length; i++){
           let temp_transform = piston_objs[i].model_transform.times(Mat4.translation([ 0, this.piston_pos, 0 ]));
-          this.shapes.box.draw( graphics_state, temp_transform, this.materials.phong );
+          this.shapes.box.draw( graphics_state, temp_transform, this.materials.box_blueGlow_phong );
         }
                 
-        this.shapes.ball.draw( graphics_state, ball_transform, this.materials.phong );
+        this.shapes.ball.draw( graphics_state, ball_transform, this.materials.ball_redGlow_phong );
       }
     //////////////////////////////////////////////////////////
     // Update Camera
     update_camera(graphics_state, ball_transform)
       {
         graphics_state.camera_transform = Mat4.look_at( Vec.of( ball_transform[0][3], ball_transform[1][3], ball_transform[2][3] 
-                                                                + 10 + Math.abs(this.velocity[0])/2 ), 
+                                                                + this.zoom_out_base_constant + Math.abs(this.velocity[0])/2 ), 
                                                         Vec.of( ball_transform[0][3], ball_transform[1][3], ball_transform[2][3] ), 
                                                         Vec.of( 0,1,0 ) )
                                                         .map( (x,i) => Vec.from( graphics_state.camera_transform[i] ).mix( x, 0.05 ) );
@@ -261,6 +266,9 @@ class Scene extends Scene_Component
 
         //check for collisions 
         this.check_all_collisions();
+
+        // Put light inside ball 
+        graphics_state.lights = [ new Light( Vec.of( this.x,this.y,this.z,1 ), Color.of( 1,0,0,1 ), 1000) , this.lights[0] ];
         
         //draw objects
         let ball_transform = Mat4.identity().times(Mat4.translation([ this.x, this.y, this.z ]) )
