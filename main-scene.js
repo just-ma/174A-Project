@@ -19,7 +19,7 @@ class Scene extends Scene_Component
           { phong: context.get_instance( Phong_Shader ).material( Color.of( 1,1,0,1 ) )
           }
 
-        this.lights = [ new Light( Vec.of( -5,5,5,1 ), Color.of( 0,1,1,1 ), 100000 ) ];
+        this.lights = [ new Light( Vec.of( -2,2,2,1 ), Color.of( 0,1,1,1 ), 100000 ) ];
 
         // Ball (moving)
         this.x = 0; // current x pos
@@ -90,7 +90,7 @@ class Scene extends Scene_Component
         this.key_triggered_button( "flip2", [ "d" ], this.flip2 );
       }
     //////////////////////////////////////////////////////////
-    // Buttons
+    // Draw Objects
     draw_objects(graphics_state, box_objs, ball_transform)
       {
         var i;
@@ -98,6 +98,16 @@ class Scene extends Scene_Component
           this.shapes.box.draw( graphics_state, box_objs[i].model_transform, this.materials.phong );
         
         this.shapes.ball.draw( graphics_state, ball_transform, this.materials.phong );
+      }
+    //////////////////////////////////////////////////////////
+    // Update Camera
+    update_camera(graphics_state, ball_transform)
+      {
+        graphics_state.camera_transform = Mat4.look_at( Vec.of( ball_transform[0][3], ball_transform[1][3], ball_transform[2][3] 
+                                                                + 10 + Math.abs(this.velocity[0])/2 ), 
+                                                        Vec.of( ball_transform[0][3], ball_transform[1][3], ball_transform[2][3] ), 
+                                                        Vec.of( 0,1,0 ) )
+                                                        .map( (x,i) => Vec.from( graphics_state.camera_transform[i] ).mix( x, 0.05 ) );
       }
     //////////////////////////////////////////////////////////
     // Update Frame Loop
@@ -114,5 +124,8 @@ class Scene extends Scene_Component
         //draw objects
         let ball_transform = Mat4.identity().times(Mat4.translation([ this.x, this.y, this.z ]) )
         this.draw_objects(graphics_state, this.map_objs, ball_transform);
+       
+        //update camera
+        this.update_camera(graphics_state, ball_transform);
       }
   }
