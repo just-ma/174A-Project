@@ -32,12 +32,17 @@ class Scene extends Scene_Component
         this.vi = Vec.of(0,8,0); // initial velocity
         this.time_last = 0; // resetting time to 0 after adding force
         this.velocity = Vec.of(0,0,0); // current velocity
+        
+        this.ball_radius = 1;
+        this.min_vel_possible_before_zero = 0.0001;
+        this.min_vel_for_bounce = 0.05;
+        this.bounce_damping_constant = 0.6;
 
         // Map Objects (static)
         this.map_objs = [
             //                         (position)           (sccale)
-            new Map_GameObject(Vec.of( 0, -3, -4 ), Vec.of( 5, 0.1, 2 )),
-            new Map_GameObject(Vec.of( 3, 0, -4 ), Vec.of( .1, 5, 2 )),
+            new Map_GameObject(Vec.of( 0, -3, -4 ), Vec.of( 5, 1, 2 )),
+            new Map_GameObject(Vec.of( 3, 0, -4 ), Vec.of( 1, 5, 2 )),
         ] 
         this.piston_objs = [
 
@@ -69,19 +74,106 @@ class Scene extends Scene_Component
         this.y = Math.pow(t - this.time_last,2) * -9.8 + (t - this.time_last) * this.vi[1] + this.y_last;
         
         this.velocity = Vec.of(50*(this.x - this.px), 50*(this.y - this.py), 0);
-        
+
+        if (this.velocity < this.min_vel_possible_before_zero)
+            this.velocity = 0;
     }
-    check_collision()
-      { if (this.y < -2){
+    check_collision(map_obj, ball_max_x, ball_min_x, ball_max_y, ball_min_y, ball_vel_x, ball_vel_y, ball_vel_mag)
+      { /*
+        if (this.y < -2){
             this.velocity[0] *= 0.8;
             this.velocity[1] *= -0.8;
             this.y = -2;
             this.add_force( Vec.of(0,0,0) );
+        }*/
+
+        var dont_flip_x_dir_sign = 1; // 1 means don't flip
+        var dont_flip_y_dir_sign = 1; // 1 means don't flip
+        
+        // Bools describing whether each edge of the ball overlaps with this map_obj
+        var bottom_overlap = (ball_min_y < map_obj.max_y && ball_min_y > map_obj.min_y);
+        var top_overlap = (ball_max_y < map_obj.max_y && ball_max_y > map_obj.min_y);
+        var left_overlap = (ball_min_x < map_obj.max_x && ball_min_x > map_obj.min_x);
+        var right_overlap = (ball_max_x < map_obj.max_x && ball_max_x > map_obj.min_x);
+       
+        
+        // BOUNCE REVERSE: Checking for FULL OVERLAP of ball inside map platform
+        if (bottom_overlap && top_overlap && right_overlap && left_overlap)
+          {
+            dont_flip_x_dir_sign = -1;
+            dont_flip_y_dir_sign = -1;
+            // Don't know where to reset position to
+          }
+        // BOUNCE to UP: Bottom of ball is overlapping
+        if (bottom_overlap && !top_overlap && ball_vel_y < 0 &&
+            ((ball_max_x < map_obj.max_x && ball_max_x > map_obj.min_x) || (ball_min_x < map_obj.max_x && ball_min_x > map_obj.min_x))) // checking within x-range
+          {
+            dont_flip_x_dir_sign = 1;
+            dont_flip_y_dir_sign = -1;
+            this.y = ball_vel_y < 0 ? map_obj.max_y + this.ball_radius : map_obj.min_y - this.ball_radius;
+            console.log("overlap bot");
+          }
+        // BOUNCE to DOWN: Top of ball is overlapping
+        else if (top_overlap && !bottom_overlap && ball_vel_y > 0 &&
+            ((ball_max_x < map_obj.max_x && ball_max_x > map_obj.min_x) || (ball_min_x < map_obj.max_x && ball_min_x > map_obj.min_x))) // checking within x-range
+          {
+            dont_flip_x_dir_sign = 1;
+            dont_flip_y_dir_sign = -1;
+            this.y = ball_vel_y < 0 ? map_obj.max_y + this.ball_radius : map_obj.min_y - this.ball_radius;
+            console.log("overlap top");
+          }
+        // BOUNCE to the RIGHT: Left of ball is overlapping
+        else if (left_overlap && !right_overlap &&
+            ((ball_max_y < map_obj.max_y && ball_max_y > map_obj.min_y) || (ball_min_y < map_obj.max_y && ball_min_y > map_obj.min_y))) // checking within y-range
+          {
+            dont_flip_x_dir_sign = -1;
+            dont_flip_y_dir_sign = 1;
+            this.x = ball_vel_x < 0 ? map_obj.max_x + this.ball_radius : map_obj.min_x - this.ball_radius;
+            console.log("overlap left");
+          }
+        // BOUNCE to the LEFT: Right of ball is overlapping
+        else if (right_overlap && !left_overlap &&
+            ((ball_max_y < map_obj.max_y && ball_max_y > map_obj.min_y) || (ball_min_y < map_obj.max_y && ball_min_y > map_obj.min_y))) // checking within y-range
+          {
+            dont_flip_x_dir_sign = -1;
+            dont_flip_y_dir_sign = 1;
+            this.x = ball_vel_x < 0 ? map_obj.max_x + this.ball_radius : map_obj.min_x - this.ball_radius;
+            console.log("overlap right");
+          }
+        else // could not collide
+          return false;
+        
+        // Did collide, so modify velocity (position was already reset)
+        if (ball_vel_mag > this.min_vel_for_bounce)
+        {
+            this.velocity[0] *= dont_flip_x_dir_sign * this.bounce_damping_constant;
+            this.velocity[1] *= dont_flip_y_dir_sign * this.bounce_damping_constant;
+            this.add_force( Vec.of(0,0,0) ); // Update current movement with our new velocity
         }
       }  
     check_all_collisions()
       {
-        this.check_collision();
+        var ball_vel_x = this.velocity[0];
+        var ball_vel_y = this.velocity[1];
+        var ball_vel_mag = Math.sqrt(ball_vel_x * ball_vel_x + ball_vel_y * ball_vel_y);
+        if (ball_vel_mag == 0)
+            return;
+
+        var ball_max_x = this.x + this.ball_radius;
+        var ball_min_x = this.x - this.ball_radius;
+        var ball_max_y = this.y + this.ball_radius;
+        var ball_min_y = this.y - this.ball_radius;
+        
+        var collided = false;
+        
+        var i;
+        for (i = 0; i < this.map_objs.length; i++)
+         {
+            this.check_collision(this.map_objs[i], ball_max_x, ball_min_x, ball_max_y, ball_min_y, ball_vel_x, ball_vel_y, ball_vel_mag);
+            collided = (ball_vel_x != this.velocity[0] && ball_vel_y != this.velocity[1]);
+            if (collided)
+             break;
+         }
       }
     //////////////////////////////////////////////////////////
     // Buttons
