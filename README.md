@@ -1,10 +1,10 @@
-# Assignment #1
+# Assignment #3
 
-## Due: October 21, 2018 at 11:59pm
+## Due: November 11, 2018 at 11:59pm
 
 ### Repository setup:
 
-1. By now you have followed the link to create your assignment repository at https://classroom.github.com/a/y9qwY8Wh. Please use this link once as it will create an repository we will not check for submissions if you use it multiple times. The repository name should lool like **a1-githubusername**. Any others will get removed.
+1. By now you have followed the link to create your assignment repository at https://classroom.github.com/a/UnK1obpj. Please use this link once as it will create an repository we will not check for submissions if you use it multiple times. The repository name should look like **a3-githubusername**. Any others will get removed.
 
 2. You should also be sure to share your GitHub username with us via this link if you have not already. https://goo.gl/forms/AKQYcllzjOP4UV6f1
 
@@ -12,134 +12,99 @@
 
 3. Once your repository is created you will have a copy of the assignment template in your github repository. Now you can clone the repository onto your local computer using the following command. Be sure do execute this command from the directory you wish to locate your work.
 
-```bash
-$ git clone git@github.com:ucla-fa18-cs174a/a1-githubusername.git
-```
+    ```bash
+      $ git clone git@github.com:ucla-fa18-cs174a/a3-githubusername.git
+      ```
 
 4. You can now follow the remaining steps of the assignment.
 
-### Gettting Started:
-
-Open the demo exactly as you did in Assignment 0: Run a dummy web server, navigate to the URL `localhost:8000`, observe the initial animation we provide, open Chrome developer tools, and perform the steps to map your local file folder as a Chrome workspace.
-
-Note that Chrome might get a bit confused because you already did this before when you made a workspace for Assignment 0, in a different folder, with the same file names. You don't want it to map to them by mistake. Delete all workspaces out of the "Filesystem" tab before you repeat step 4 from Assignment 0. In other words, you want new green dots from dragging in your Assignment 1 folder, not misleading ones still pointing at Assignment 0's files.
-
-At that point you'll be safe to edit your files without your edits disappearing or changing the wrong files. Then, proceed as follows.
-
-### Preliminary Steps - Using the Code Library
-
-In order to use our library, `tiny-graphics.js`, you the programmer must provide additional code: Three custom JavaScript classes. Each of the three will be a subclass of a different base class from tiny-graphics.js: `Shape`, `Shader`, and `Scene_Component`. A `Shape` defines a 3D shape to draw, a `Shader` defines some code for coloring in triangles (perhaps as though they were illuminated by light sources), and a `Scene_Component` class tells the 3D canvas and web page what you want to happen (usually, drawing a scene by placing shapes). The three subclasses must define certain methods correctly for the library to work, or nothing will get drawn.
-
-In order to get you started, we have provided TWO examples in your code of each of those custom subclasses, and you only have to tweak them to do this assignment. One of the Shapes we give, `Cube`, is complete, while the other, `Cube_Outline` is left empty for you to fill in.
-
-The two scenes we provide you are both located inside the file `main-scene.js`. Of these two `Scene_Component` subclasses in there, the one called `Assignment_One_Scene` is incomplete and draws nothing, left for you to fill in. It contains necessary setup code that you will need for making the required scene for credit.
-
-The other scene we provided in `main-scene.js` is a fully defined working example for you. The class, called `Transforms_Sandbox`, draws the extremely simple scene of boxes and balls you see when you initially run your Assignment 1 files. It is only thirty lines of code long, and exposes only the function calls that you need to see. It has the bare minimum to start using graphics to build a your first scene. Start your coding work there.
-
-### Experimenting with Transforms_Sandbox
-
-Inside the `display()` method of class `Transforms_Sandbox`, you will see some lines of code that call "`draw()`" on a particular shape, causing one of that shape to appear in the scene. You will also see other lines of code that modify a `model_transform` variable that contains a 4 by 4 matrix. These lines of code perform translations, rotations and scales -- the main math operations you need to understand to get started with graphics. To call them, pass in a 3x1 vector (a `Vec`, or a regular JavaScript array of three floats). In the case of `rotation()`, a scalar (representing the angle in radians) must be also provided along with the `Vec` (representing the axis of rotation).
-
-Read the code comments above the `Vec` and `Mat` classes in `tiny-graphics.js` to see how they work.
-
-Note I: Only the `Vec.of()` function can generate new `Vec`s.
-
-Note II: JavaScript has no operator overloading, so operations like `+, -, *, +=, *=,` etc. will not compile if you try to use them on the vector and matrix types (`Vec` and `Mat`). Instead use `times()` as shown in the `Transforms_Sandbox` class definition, and assign its return value back into your matrix to incrementally modify it. These can be chained together like so:
-
-```javascript
-M = M.times( T ).times( R ).times( S );
-this.shapes.box.draw( graphics_state, M, this.clay.override({ color: blue }) );
-```
-
-![image-0](docs/image-0.gif)
-
-Play with the code in `Transforms_Sandbox` and re-run your program until you are comfortable with the effects of changing numbers passed in to the transforms. Move around the calls to `draw()` to place new shapes. Put your operations into loops to draw lots of shapes and test your understanding of JavaScript.
-
-Once you are comfortable with this, begin implementing the graded requirements below (a stack of cubes). You can paste code without issue from `Transform_Sandbox` to Assignment_One_Scene as long as it goes in `display()`, and you'll want to move over to there before going any farther.
-
-__Your final scene must go in the `Assignment_One_Scene` class in order to be graded.__
-
-That class exposes its constructor to you, where you can see how it sets up the camera, lighting shader, and materials (which contain quantities related to how shapes and lights will interact), which are all defined there to help you do the actual assignment requirements.
-
-In order to select the scene `Assignment_One_Scene` to display instead of `Transforms_Sandbox`, once you are ready to switch you must change your `index.html` file. Simply replace where the `Transforms_Sandbox` name appears with `Assignment_One_Scene`. It will draw that instead.
-
-We have marked places in the code with "**// TODO**" to demark anywhere we intend for your final code to be in order to get points. All of these places you modify are inside the file `main-scene.js`.
-
 ### Graded Steps
 
-#### Up to 50 points of credit. There is no partial credit any individual requirement.
+#### Up to 50 points of credit plus 15 points extra credit. There is no partial credit on any individual requirement. Late assignments are penalized 25% per day.
 
 Implement the assignment in clean and understandable code. Each required part must successfully draw and show up onscreen in order to count.
 
-NOTE: Please use the default camera definition defined in the `Assignment_One_Scene` class.
-
 **If any parts are unclear, ask on Piazza.**
 
-#### Point distribution:
+#### Point distribution
 
-1. Modify our template, which displays WebGL in an HTML canvas, without introducing errors – **5 points.**
+1. Implement functionality to load two different square images of your choice* into texture maps. You must include whatever files are needed for us to run your code in the "assets" folder of your repository (images, etc) **- 5 points**
 
-2. Display a stack of eight (8) unit cubes starting from the origin and extending upward – **10 points.**
+   **Remember**, not just any image that you download will work.  Images used for texture maps in WebGL 1.0 must be square and have power of two dimensions (therefore only square images of a few limited sizes like 128x128 and 256x256 are valid).  WebGL 2.0 doesn't have this limitation but it also isn't widely supported on phones yet so we don't use it.
 
-    Instance each of the eight cubes from the same geometry data (we defined this as "box" in your scene's constructor function). Due to our other provided code in the constructor, the boxes will appear with a symmetric perspective projection, with square aspect ratio (not stretched or squeezed). The initial camera position at the given position (-5, 10, 30) is far back enough to view the scene. Note that to place a camera there is the opposite transform action that would be used to place a regular shape.
+   To load a texture into a `Material`, assign a new value to the `Material` object called `"texture"`.  To assign `"texture"` with the right value, use one of our functions that returns a reference to an image file.  Load your image using the function `get_instance` (which makes sure the program only tries to load the file once even if you request it multiple times), found in class `Webgl_Manager` from `tiny-graphics.js`.  The syntax you'll use is `context.get_instance( "assets/your filename", use_mipMap )` where `use_mipMap` is a boolean that gets passed on to the `Texture` class.  You can read the class `Texture` to see what this boolean does; it determines which built-in WebGL functions are called to set the texture sampling method.  The boolean defaults to `true` if you omit it.  For a sampling method, class `Texture` offers a choice between tri-linear (best) or nearest-neighbor (worst but simple).
 
-3.  Make the stack of boxes sway like a blade of grass in the wind. It should sway back and forth three times per second. Be exact if you can. Here is a GIF, slowed down. It shows other parts of the assignment completed as well.
+   A `Texture`'s color is scaled by the Phong formula's ambient weight.  Make your image match its original colors this time, by setting the ambient `color` to opaque black and the `ambient` coefficient to 1.  (FYI, images with transparent pixels are accounted for in the formula too -- the shape's base color affects the texture's color additively, but the transparencies combine multiplicatively).
 
-    ![image-1](docs/image-1.gif)
+2. Apply the entire first texture image onto each face of a cube (cube #1) that has dimensions 2x2x2. The texture coordinates should range from (0,1) in both the s and t dimensions. Filtering should be set to use nearest neighbor. **– 10 points**
 
-    (a) Without passing through one another, the boxes must rotate over time to a maximum angle of `.04*Math.PI`. Place the hinge of each box's rotation motion exactly at the top right edge of the box underneath it. Each box touches the previous in exactly the same way and remains in constant contact, precisely connected only by the correct edge. The boxes may not separate from each other along this edge; no floating geometry is allowed – **10 points.**
+3. Create a second cube (cube #2) with dimension 2x2x2 where the second texture image is applied to each face but is zoomed out by 50% (the image should shrink; the whole image will appear four times, once in each corner). Enable Mip Mapping for the zoomed texture using tri-linear filtering **- 10 points**
 
-        Hint: Remember that you can chain more than just one translation and rotation together when adjusting your transformation between drawing shapes. You might need to.
+4. Position both cubes side by side within the view of your starting camera view:  Place the camera 5 units back from the origin. Both cubes should have a dimension of 2x2x2. Place the center of cube #1 at (-2,0,0) and the center of cube #2 at (2,0,0). Use a perspective projection.  As you move the camera nearer or farther away, along the z-axis, from the cubes we should see the effect of the texture filtering as the textures get smaller or larger.  For the cube that uses poor sampling, the image should show grainy, flashing static noise at the pixel level **- 5 points**
 
-    (b) Fluidity of your rotation motion matters. Functions of the form `f(t) = a + b*sin(w*t)` are useful for modeling periodic motion, where "`a`" is large enough that the rotation angle does not go negative and cause boxes to collide. Use `graphics_state.animation_time` for `t`, which is how long the program's been running in milliseconds – **4 points.**
+5. Use the key ‘c’ (with our usual web buttons) to start and stop the rotation both cubes. The cube #1 should rotate around its own X-axis at a rate of 30 rpm. Cube #2 should rotate around its own Y-axis at a rate of 20 rpm. The cubes should not jump to a different angle when they start and stop **- 10 points**
 
-    (c) Iteratively place the rest of the moving box segments on top of one another to complete the swaying motion. Use a hierarchical approach - each box's transform is the "child" of the previous transform, derived from its matrix value – **2 points.**
+6. Use continuous scrolling the texture map on cube #2. Translate the texture varying the s texture coordinate by 2 texture units per second, causing it to slide along the box faces.  Reset the texture coordinates passed into the GLSL's `texture2D` call periodically so they do not continue to grow forever, which could cause the interpolated values to lose needed decimal precision **- 5 points**
 
-        Hint: To make structures that have a parent-child hierarchy like this, you must incrementally create your transform using `times()` to **post-multiply** each new term onto the right side of your matrix variable. Do this to incrementally change it from the value that drew the previous (parent) box. Never do a pre-multiply for this assignment; for certain reasons that's not as useful for designing structures that you think of as a hierarchy of shapes.
+   To code this part, fill in class `Texture_Scroll_X` which will be a modification of `Phong_Shader`, overwriting its `fragment_glsl_code` function to give it new fragment shader code.  Use that shader instead of `Phong_Shader` for cube #1.  
 
-    You should learn to organize your code into functions, instead of describing your whole scene in `display()`. For part (c) we recommend moving your code for drawing one box into the blank `draw_box()` method, and then calling it many times from `display()` using a for loop. Changing the function signature (arguments) to `draw_box()` is allowed, since it may be necessary to know which box (numbered from bottom to top) you're drawing for color purposes.
+   Note 1: In the fragment shader, the varying "`f_tex_coord`" stores the vec2 of pre-interpolated texture coordinates.
 
-    (d) Fill in code inside your class method `make_control_panel()` to implement a button to help us with grading. To do this, call `key_triggered_button()` as already shown inside the method, and make sure the second argument is [ "m" ] so that we can press the m key to test your button. Fill in the third argument, the function that gets executed each button press, so as to make it toggle the swaying motion on and off. When the swaying is turned off, your blade of grass must be extended out to the maximum possible angle of `.04*Math.PI` so that we can see the gaps between your boxes along the left side – **2 points.**
+   Note 2: The variable `animation_time` is already passed all the way through into the fragment shader for you.
 
-4.
-    (a) Color each box differently from the one underneath, for contrast. So that colors stay the same from one frame to the next, base your colors on persistent variables you store in your class, which means you'll use the "this" keyword to declare them – **7 points.**
+   Warning:  When coding in GLSL, integer literals like "2" cannot be used most of the time.  Use floats instead by ending your number in a decimal.  Also, you'll have to describe PI for it since there is no built-in constant.  You can make a 4x4 matrix of any form using the `mat4()` constructor, where the matrix is in *column-major* order (the first four entries are the first column, etc).
 
-    (b) Fill in the `set_colors()` function to somehow cause your class's colors to reset to different values. Once you do this, pressing the 'c' key (which already calls `set_colors`) should cycle the colors between the cubes – **2 points.**
+7. Rotate the texture map itself on all faces of cube #1 around the center of each face at a rate of 15 rpm.  As with #6, prevent the rotation angle from growing excessively as `animation_time` grows **- 5 points**
 
-5. Draw each cube’s outline (the edges) in white. For this, you will need to design a new `Shape` subclass. Fill in the empty parts we left in the `Cube_Outline` class, defined in your `main-scene.js` file. It will be like your `Cube`'s definition above it, except with your own brand new arrays. Each vertex gets a position and a color (`colors` replaces `normals` in this example). Define the positions of your cube outline as x,y,z coordinates of the cube points. Order them in pairs, so that each pair is one edge of the outline. You may NOT have any extra edges going across diagonals. Set each color value in the `colors` array to full white - making sure the list has as many entries as the `positions` list. Do not make an indices list - instead use "`this.indexed = false`".
-
-    (a) To actually draw your outline, you will need to call `draw()` on it and pass in a material that is compatible with it. That's because you just changed its available `Shape` fields to "positions" and "colors", and so the type of `Shader` we use on it has to know what to do with that information. The variable we called "`this.white`" already holds such a proper, compatible material -- so just pass that one in as your third parameter to `draw()` your outline. This should draw it using exactly the colors you made for it (white colors). Lastly, to actually draw lines instead of triangles (letting it know that there's __pairs__ of vertices instead of triples), you must pass in the string "LINES" as the fourth argument to `draw()` – **6 points.**
-
-    (b) Rather than drawing your outline at all times, fill in code inside your class method `make_control_panel()` to implement another button. Call `key_triggered_button()` as shown, and make sure the second argument is [ "o" ] so that we can press the o key to test your button. Fill in the third argument, the function that gets executed each button press, so as to toggle a flag that you'll use to turn the outline on and off. When the outline is off, draw the boxes normally (colors, lighting, etc.). When the outline is on, draw the outline instead on all boxes (it's OK to skip doing this for the bottom-most box since it's special, as explained below) – **2 points.**
+   To code this part, fill in class `Texture_Rotate` which will be a modification of `Phong_Shader`, overwriting its `fragment_glsl_code` function to give it new fragment shader code.  Use that shader instead of `Phong_Shader` for cube #2.
 
 #### Extra Credit: Each can be attempted individually. There is no partial credit on any individual extra credit.
 
-I.  Triangle strips are a common graphics primitive. Implement the very bottom box's geometry as a single triangle strip primitive. This is like making a cube that can unfold into a single line of triangles.
+1. Design the most complex custom polygonal shape you can.  It should be non-planar and preferably a closed volume.  Display it 2 units beneath the origin at a size that does not interfere with the boxes.  Use Phong lighting and color it so we can notice it.  Take advantage of automation in the code that generates your custom Shape **- 5 points**
 
-Create a new `Shape` subclass with whatever correct entries in the `positions` and `indices` lists that will make that happen. Give each vertex a `normal` too that is simply equal to the position. When calling `draw()` to make this box, pass in the string "TRIANGLE_STRIP" for the fourth argument so that the graphics card uses triangle strip indexing. This box should appear lit up differently than the others, especially near edges as you move the camera around it, because of its unusual layout – **5 points.**
+   Automation can include:
+     - For loops (or other code flow control, such as conditionals or in the case of subdivision surfaces, recursion)
+     - The use of matrix transforms on points and normal vectors (if M is multiplied onto a point, remember that `M.inverse().transposed()` must be multiplied onto the normal to have the correct effect)
+     - The `insert_transformed_copy_into()` function built into the `Shape` class, which allows you to build compound shapes.   
 
-II. Scale your boxes so that instead of being unit cubes, they are stretched to 1.5x their length only along the Y axis. Adjust your translations accordingly so that the correct hinge contact points are maintained throughout the swaying motion. Again, no floating geometry is allowed. Neither are any shearing effects that deform the boxes to non-right angles during motion. Prepare your left-to-right chain of transformations accordingly for each separate shape so that those things cannot happen – **5 points.**
+   Tip:  Our Shape class neatly provides the ability to compound multiple defined shapes together into a single combined vertex array.  Vertex arrays with tons of triangles in them don't take that much longer to draw than simple shapes, compared to the high cost of issuing individual `draw()` calls across the high-latency GPU data bus to draw several simple vertex arrays.   Class `Shape`’s compounding feature can thus speed up performance considerably and let you fit more complex shapes (made up of smaller sub-shapes) onscreen at once without slowdown.
 
-### Submitting Assignment 1 on GitHub:
+   This practice also eliminates a lot of duplicated code you would normally need to provide when trying to pack complex multi-part shapes into a single performance friendly buffer. You can perform a single `insert_transformed_copy_into()` call in any Shape definition to insert other defined shapes into the current array, at custom affine transform offsets. Positions and normal vectors are automatically adjusted by the affine transform during insertion.  Call `insert_transformed_copy_into()` on the source shape's prototype, and for the first argument pass in the destination shape object.  To discover what that means, observe the examples of it being called in the file `dependencies.js`.  The second argument is an array of parameters to pass into the source shape's constructor.  The third argument is the desired transform offset of the shape you are inserting.
 
-1. Once you are finished working it is time to 'commit' your work to your remote respository on GitHub. You will also want to do this periodically while you are working to make a backup of your work and to make your final submission. We will keep the process very simple by just 'committing' the master branch of your local repository into the remote repository on GitHub.
+2. Be warned: Attempting this part will require work in all of `Phong_Shader`'s functions, and we have not tried it out ourselves yet to make sure it is feasible.
 
-2. The first step is to add any new files into the respository so they can be tracked.
+   Make a new Shader similar to `Phong_Shader` that accepts a second `Texture` object, and use it convincingly for bump mapping.  The texture image and bump image should be substantially different from one another.  Include both files in your assets folder.
 
-```bash
-$ git add *
-```
+   If you attempt this part, create a third cube 2 units above the origin and make sure that its movement and choice of images makes the bump mapping effect as obvious as possible.  We should be able to see the light shine off the bumps to reveal the designs of your bump image, regardless of the designs in your texture image **- 10 points**
 
-3. Then we commit any new and or changed files to the repository. The text after the -m is for you to describe what is included in this commit to the respository.
+   If you attempt this, it will be helpful to know how variables reach the shader programs from our JavaScript library.  All GLSL variables you declare in your shader program are automatically detected by our class `Graphics_Addresses` (from `tiny-graphics.js)`.  A `Graphics_Addresses` object (called "`gpu`" in your `Phong_Shader` code) fills itself with data members with the same name as the GLSL variables plus "`_loc`", since they are pointers to the locations in GPU memory where the program variables are.  You can send JavaScript values to the various `_loc` variables by mimicking the example code found in method `update_GPU()` of `Phong_Shader`.  FYI, this gpu object is kept with the Material because the Shape class also has a use for it.  When `draw()` is called, the pointers it keeps to your shader's attribute variables are matched up to your correct memory buffers for your array data (`positions`, `normals`, etc).
 
-```bash
-$ git commit -m "Description of what I did"
-```
+   This tutorial might help you add a second texture sampler to your shader::
+
+   https://webglfundamentals.org/webgl/lessons/webgl-2-textures.html
+
+   You will probably need new WebGL commands from that tutorial that don't appear in the library, such as `gl.activeTexture()` and `gl.uniform1i()`.  Presently, the default value of zero for a uniform seems to be how our default `Sampler2D` for texturing is selected.
+
+### Submitting Assignment 3 on GitHub:
+
+1. Once you are finished working it is time to 'commit' your work to your remote repository on GitHub. You will also want to do this periodically while you are working to make a backup of your work and to make your final submission. We will keep the process very simple by just 'committing' the master branch of your local repository into the remote repository on GitHub.
+
+2. The first step is to add any new files into the repository so they can be tracked.
+
+    ```bash
+      $ git add *
+      ```
+
+3. Then we commit any new and or changed files to the repository. The text after the -m is for you to describe what is included in this commit to the repository.
+
+    ```bash
+      $ git commit -m "Description of what I did"
+      ```
 
 4. Finally, we need to push these changes up to our remote repository on GitHub. This is a very important step! Without it you are not copying your work back to GitHub and we will not be able to see it if you forget.
 
-```bash
-$ git push remote origin
-```
+    ```bash
+      $ git push remote origin
+      ```
 
 5. You can repeat these commands as often as you feel the need as your work on your assignment. However, again, you must always make a final push to GitHub when you are finished in order to submit your work. We will make a clone of all of the assignment repositories at the deadline. That implies two things. First, make your final push to GitHub ahead of time and second, any pushes you make after the deadline will not be seen by us.
