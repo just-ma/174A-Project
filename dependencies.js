@@ -2,7 +2,6 @@
 class Map_GameObject
 { constructor(position, scale)
     {
-      //Object.assign( this, { position, color, attenuation: 1/size } );
       this.center = position;
       this.max_x = this.center[0] + Math.abs(scale[0]);
       this.min_x = this.center[0] - Math.abs(scale[0]);
@@ -14,6 +13,24 @@ class Map_GameObject
       this.model_transform = Mat4.identity()
                               .times( Mat4.translation(position) )
                               .times( Mat4.scale(scale) );
+    }
+}
+
+class Piston_GameObject
+{ constructor(position, rotation)
+    {
+      this.center = Vec.of(position[0] + Math.cos(rotation), position[1] - Math.sin(rotation), position[2]);
+      this.center_origin = position;
+      this.max_x = this.center[0] + 1 + Math.cos(rotation);
+      this.min_x = this.center[0] - 1 + Math.cos(rotation);
+      this.max_y = this.center[1] + 1 - Math.sin(rotation);
+      this.min_y = this.center[1] - 1 - Math.sin(rotation);
+      
+      this.detect_radius = 2;
+
+      this.model_transform = Mat4.identity()
+                              .times( Mat4.translation(position) )
+                              .times( Mat4.rotation( rotation , Vec.of( 0,0,1 )) );
     }
 }
 

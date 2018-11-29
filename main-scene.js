@@ -38,17 +38,37 @@ class Scene extends Scene_Component
         this.min_vel_for_bounce = 0.05;
         this.bounce_damping_constant = 0.6;
 
+        // Piston
+        this.piston_pos = 0; // current piston position
+        this.piston_t = 0;   // piston time used for animation
+
         // Map Objects (static)
         this.map_objs = [
             //                         (position)           (sccale)
             new Map_GameObject(Vec.of( 0, -3, -4 ), Vec.of( 5, 1, 2 )),
             new Map_GameObject(Vec.of( 3, 0, -4 ), Vec.of( 1, 5, 2 )),
         ] 
+        // Piston Objects (static)
         this.piston_objs = [
+            //                           (position)     (rotation)
+            new Piston_GameObject(Vec.of( 2, 0, -4 ), Math.PI / 6),
+            new Piston_GameObject(Vec.of( -6, 3, -4 ), -Math.PI / 2)
 
         ]
 
       }
+    //////////////////////////////////////////////////////////
+    // Piston Functions
+    piston_push(){
+        this.piston_t = 10;
+    }
+    piston_function( x ){
+        if (x > 6){
+            this.piston_pos = 5 - 0.5 * x;
+        } else {
+            this.piston_pos = x/3;
+        }
+    }
     //////////////////////////////////////////////////////////
     // Physics Functions
     add_force( force ){
@@ -180,15 +200,27 @@ class Scene extends Scene_Component
     make_control_panel()
       { this.key_triggered_button( "flip", [ "a" ], this.flip );
         this.key_triggered_button( "flip2", [ "d" ], this.flip2 );
+        this.key_triggered_button( "piston", [ "w" ], this.piston_push );
+
       }
     //////////////////////////////////////////////////////////
     // Draw Objects
-    draw_objects(graphics_state, box_objs, ball_transform)
+    draw_objects(graphics_state, box_objs, piston_objs, ball_transform)
       {
         var i;
         for (i = 0; i < box_objs.length; i++)
           this.shapes.box.draw( graphics_state, box_objs[i].model_transform, this.materials.phong );
-        
+
+        if (this.piston_t > 0){
+            this.piston_t--;
+            this.piston_function(this.piston_t);
+        }
+
+        for (i = 0; i < piston_objs.length; i++){
+          let temp_transform = piston_objs[i].model_transform.times(Mat4.translation([ 0, this.piston_pos, 0 ]));
+          this.shapes.box.draw( graphics_state, temp_transform, this.materials.phong );
+        }
+                
         this.shapes.ball.draw( graphics_state, ball_transform, this.materials.phong );
       }
     //////////////////////////////////////////////////////////
@@ -215,7 +247,7 @@ class Scene extends Scene_Component
         
         //draw objects
         let ball_transform = Mat4.identity().times(Mat4.translation([ this.x, this.y, this.z ]) )
-        this.draw_objects(graphics_state, this.map_objs, ball_transform);
+        this.draw_objects(graphics_state, this.map_objs, this.piston_objs, ball_transform);
        
         //update camera
         this.update_camera(graphics_state, ball_transform);
