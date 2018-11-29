@@ -1,3 +1,23 @@
+// Our classes
+class Map_GameObject
+{ constructor(position, scale)
+    {
+      //Object.assign( this, { position, color, attenuation: 1/size } );
+      this.center = position;
+      this.max_x = this.center[0] + Math.abs(scale[0]);
+      this.min_x = this.center[0] - Math.abs(scale[0]);
+      this.max_y = this.center[1] + Math.abs(scale[1]);
+      this.min_y = this.center[1] - Math.abs(scale[1]);
+      
+      this.detect_radius = Math.abs(scale[0]) + Math.abs(scale[1]);
+
+      this.model_transform = Mat4.identity()
+                              .times( Mat4.translation(position) )
+                              .times( Mat4.scale(scale) );
+    }
+}
+
+// Garret's Dependencies
 window.Triangle = window.classes.Triangle =
 class Triangle extends Shape    // The simplest possible Shape – one triangle.  It has 3 vertices, each
 { constructor()                 // having their own 3D position, normal vector, and texture-space coordinate.
