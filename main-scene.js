@@ -25,26 +25,29 @@ class Scene extends Scene_Component
         this.y = 0;
         this.px = 0;
         this.py = 0;
+        this.x_last = 0;
+        this.y_last = 0;
         this.vi = Vec.of(5,8,0);
         this.time_last = 0;
+        this.velocity = Vec.of(0,0,0);
       }
     flip() {
-        this.vi[0] = -2;
-        this.vi[1] = 8;
+        this.vi[0] = -5 + this.velocity[0];
+        this.vi[1] = 10 + this.velocity[1];
         console.log(this.vi);
-        this.px = this.x;
-        this.py = this.y;
+        this.x_last = this.x;
+        this.y_last = this.y;
         this.time_last = this.time;
       }
     flip2() {
-        this.vi[0] = 2;
-        this.vi[1] = 8;
+        this.vi[0] = 5 + this.velocity[0];
+        this.vi[1] = 10 + this.velocity[1];
         console.log(this.vi);
-        this.px = this.x;
-        this.py = this.y;
+        this.x_last = this.x;
+        this.y_last = this.y;
         this.time_last = this.time;
       }
-    make_control_panel( graphics_state )            // Draw the scene's buttons, setup their actions and keyboard shortcuts, and monitor live measurements.
+    make_control_panel()
       { this.key_triggered_button( "flip", [ "a" ], this.flip );
         this.key_triggered_button( "flip2", [ "d" ], this.flip2 );
       }
@@ -53,9 +56,15 @@ class Scene extends Scene_Component
         const t = graphics_state.animation_time / 1000, dt = graphics_state.animation_delta_time / 1000;
         this.time = t;
 
-        this.x = (t - this.time_last) * this.vi[0] + this.px;
-        this.y = Math.pow(t - this.time_last,2) * -9.8 + (t - this.time_last) * this.vi[1] + this.py;
+        this.px = this.x;
+        this.py = this.y
+
+        this.x = (t - this.time_last) * this.vi[0] + this.x_last;
+        this.y = Math.pow(t - this.time_last,2) * -9.8 + (t - this.time_last) * this.vi[1] + this.y_last;
         
+        this.velocity = Vec.of(50*(this.x - this.px), 50*(this.y - this.py), 0);
+        console.log(this.velocity);
+
         let ground = Mat4.identity().times( Mat4.scale([ 5, 0.2, 2 ]) )
                                             .times( Mat4.translation([ 0, -12, -2 ]) )
         this.shapes.box.draw( graphics_state, ground, this.materials.phong );
