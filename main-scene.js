@@ -1,5 +1,5 @@
-window.Assignment_Three_Scene = window.classes.Assignment_Three_Scene =
-class Assignment_Three_Scene extends Scene_Component
+window.Scene = window.classes.Scene =
+class Scene extends Scene_Component
   { constructor( context, control_box )
       { super(   context, control_box );
         if( !context.globals.has_controls   ) 
@@ -11,6 +11,7 @@ class Assignment_Three_Scene extends Scene_Component
         context.globals.graphics_state.projection_transform = Mat4.perspective( Math.PI/4, r, .1, 1000 );
 
         const shapes = { box:   new Cube(),
+                         ball:  new Subdivision_Sphere(5)
                        }
         this.submit_shapes( context, shapes );
 
@@ -20,11 +21,26 @@ class Assignment_Three_Scene extends Scene_Component
 
         this.lights = [ new Light( Vec.of( -5,5,5,1 ), Color.of( 0,1,1,1 ), 100000 ) ];
 
+        this.x = 0;
+        this.y = 0;
+        this.px = 0;
+        this.py = 0;
+        this.vi = Vec.of(5,8,0);
+        this.t2 = 0
+
       }
     display( graphics_state )
       { graphics_state.lights = this.lights;
-        const t = graphics_state.animation_time / 1000, dt = graphics_state.animation_delta_time / 1000;
+        const t = graphics_state.animation_time / 10000, dt = graphics_state.animation_delta_time / 1000;
+        
+        this.y = (Math.pow(t,2) - this.t2) * -9.8 + t * this.vi[1];
+        this.x = t * this.vi[0];
+        
+        let ground = Mat4.identity().times( Mat4.scale([ 5, 0.2, 2 ]) )
+                                            .times( Mat4.translation([ 0, -12, -2 ]) )
+        this.shapes.box.draw( graphics_state, ground, this.materials.phong );
 
-        this.shapes.box.draw( graphics_state, Mat4.identity(), this.materials.phong );
+        let ball_transform = Mat4.identity().times(Mat4.translation([ this.x, this.y, -4 ]) )
+        this.shapes.ball.draw( graphics_state, ball_transform, this.materials.phong );
       }
   }
