@@ -5,20 +5,23 @@ class Scene extends Scene_Component
         //if( !context.globals.has_controls   ) 
         //  context.register_scene_component( new Movement_Controls( context, control_box.parentElement.insertCell() ) ); 
 
-        context.globals.graphics_state.camera_transform = Mat4.look_at( Vec.of( 0,0,5 ), Vec.of( 0,0,0 ), Vec.of( 0,1,0 ) );
+        context.globals.graphics_state.camera_transform = Mat4.look_at( Vec.of( 0,0, 5 ), Vec.of( 0,0,0 ), Vec.of( 0,1,0 ) );
 
         const r = context.width/context.height;
         context.globals.graphics_state.projection_transform = Mat4.perspective( Math.PI/4, r, .1, 1000 );
 
         const shapes = { box:   new Cube(),
-                         ball:  new Subdivision_Sphere(5)
+                         ball:  new Subdivision_Sphere(5),
+                         torus:  new Torus( 3, 3 )
                        }
         this.submit_shapes( context, shapes );
 
         this.materials =
-          { phong: context.get_instance( Phong_Shader ).material( Color.of( 0,0,0,1 ), {ambient:1, texture: context.get_instance( "assets/rock_repeating.jpg", false )}, { specular:1.0 } ),
-            ball_redGlow_phong: context.get_instance( Phong_Shader ).material( Color.of( 1,0,0,1 ), {ambient:1.0}, { diffuse:0.0 }, { specular:0.0 } ),
-            box_blueGlow_phong: context.get_instance( Phong_Shader ).material( Color.of( 0,0.5,0.5,1 ), {ambient:0.15}, { diffuse:0.0 }, { specular:1.0 } ),
+          { phong: context.get_instance( Phong_Shader ).material( Color.of( 0,0,0,1 ), {ambient:1, texture: context.get_instance( "assets/square.png", false )}, { specular:1.0 } ),
+            skybox: context.get_instance( Phong_Shader ).material( Color.of( 0,0,0,1 ), {ambient:1, texture: context.get_instance( "assets/skybox.png", false )}),
+            ball_redGlow_phong: context.get_instance( Phong_Shader ).material( Color.of( 0,0,0,1 ), {ambient:1.0, texture: context.get_instance( "assets/ball.png", false )} ),
+            piston: context.get_instance( Phong_Shader ).material( Color.of( 0,0,0,1 ), {ambient:1, texture: context.get_instance( "assets/piston.png", true )}, { specular:1.0 } ),
+            goal: context.get_instance ( Phong_Shader ).material( Color.of( 0,0,0,.8 ), {ambient:1, texture: context.get_instance( "assets/square.png", false )}, { specular:1.0 } ),
           }
 
         this.lights = [ new Light( Vec.of( -2,2,0,1 ), Color.of( 0,0,1,1 ), 0 ) ];
@@ -28,14 +31,13 @@ class Scene extends Scene_Component
 
         // Ball (moving)
         this.x = 0; // current x pos
-        this.y = 0; // current y pos
-        this.z = 0; // current z pos
+        this.y = -4; // current y pos
         this.z = -4 // locked z pos
         this.px = 0; // previous frame x pos
         this.py = 0; // previous frame y pos
         this.x_last = 0; // new origin x for calculating physics
         this.y_last = 0; // new origin y for calculating physics
-        this.vi = Vec.of(0,8,0); // initial velocity
+        this.vi = Vec.of(0,1,0); // initial velocity
         this.time_last = 0; // resetting time to 0 after adding force
         this.velocity = Vec.of(0,0,0); // current velocity
         
@@ -44,33 +46,54 @@ class Scene extends Scene_Component
         this.min_vel_for_bounce = 0.05;
         this.bounce_damping_constant = 0.6;
 
-        // Piston
-        this.piston_pos = 0; // current piston position
-        this.piston_t = 0;   // piston time used for animation
-        this.piston_vec = Vec.of(0,0,0);
-
         // Map Objects (static)
         this.map_objs = [
             //                         (position)           (scale)
-            new Map_GameObject(Vec.of( 0, -4, -4 ), Vec.of( 10, 1, 2 )),
-            new Map_GameObject(Vec.of( 0, 0, -8 ), Vec.of( 1, 5, 2 ))
+            new Map_GameObject(Vec.of( 15, -4, -4 ), Vec.of( 20, 1, 2 )), //bottom
+            new Map_GameObject(Vec.of( -4, 4, -4 ), Vec.of( 1, 8, 2 )), //left
+            new Map_GameObject(Vec.of( 34, 4, -4 ), Vec.of( 1, 8, 2 )), //right
+            new Map_GameObject(Vec.of( 15, 12, -4 ), Vec.of( 20, 1, 2 )), //top
+            new Map_GameObject(Vec.of( 8, -2, -4 ), Vec.of( 2, 2, 2 )), //pillar 1
+            new Map_GameObject(Vec.of( 12, 0, -4 ), Vec.of( 2, 5, 2 )), //pillar 2
+            new Map_GameObject(Vec.of( 18, 6, -4 ), Vec.of( 1, 6, 2 )), //pillar 3
+            
         ] 
+
         // Piston Objects (static)
         this.piston_objs = [
             //                           (position)     (rotation)  (power)
-            new Piston_GameObject(Vec.of( 6, 0, -4 ), Math.PI / 3,    20),
-            new Piston_GameObject(Vec.of( -6, 3, -4 ), -Math.PI / 2,  15),
-            new Piston_GameObject(Vec.of( 0, -4, -2 ), 0,  15),
-
+            new Piston_GameObject(Vec.of( 4, -3, -4 ), 0,  15),
+            new Piston_GameObject(Vec.of( 8, 0, -4 ), 0,  15),
+            new Piston_GameObject(Vec.of( 22, -3, -4 ), -Math.PI  / 8,  15),
+            new Piston_GameObject(Vec.of( 30, 1, -4 ), Math.PI  / 8,  15),
+            new Piston_GameObject(Vec.of( 26, 5, -4 ), -Math.PI  / 8,  15),
         ]
 
+        this.piston_pos = 0; // current piston position
+        this.piston_t = 0;   // piston time used for animation
+        this.piston_vec = []; //vector for each piston
+        this.current_pistons = []; //current collided pistons
+
+        // Piston
+        for (var i = 0; i < this.piston_objs.length; i++) {
+            this.piston_vec[i] = Vec.of(0,0,0);
+            this.current_pistons[i] = 0;
+        }
+        
+
+        // Goal Object (static)               (position)
+        this.goal_obj = new Goal_GameObject(Vec.of(30, 8, -4));
       }
     //////////////////////////////////////////////////////////
     // Piston Functions
     piston_push(){
         this.piston_t = 10;
-        this.add_force(this.piston_vec);
-        console.log("tried pushing "+this.piston_vec);
+        for(var i = 0; i < this.piston_objs.length; i++) {
+            if (this.current_pistons[i] == 1) { //check which piston is currently touching ball
+                this.add_force(this.piston_vec[i]); //apply force of that piston
+            }
+        }
+        console.log("tried pushing "+this.piston_vec[0]);
     }
     piston_function( x ){
         if (x > 6){
@@ -89,10 +112,10 @@ class Scene extends Scene_Component
         this.time_last = this.time;
     }
     flip() {
-        this.add_force( Vec.of(-5,2,0) );
+        this.add_force( Vec.of(-10,1,0) );
       }
     flip2() {
-        this.add_force( Vec.of(5,2,0) );
+        this.add_force( Vec.of(10,1,0) );
       }
     run_newtonian_physics(t)
     {
@@ -184,14 +207,36 @@ class Scene extends Scene_Component
             this.add_force( Vec.of(0,0,0) ); // Update current movement with our new velocity
         }
       }  
-    check_piston_collision(piston_obj, ball_max_x, ball_min_x, ball_max_y, ball_min_y)
+    check_piston_collision(piston_obj, ball_max_x, ball_min_x, ball_max_y, ball_min_y, index)
       { if (ball_min_y < piston_obj.center[1]+1 && ball_max_y > piston_obj.center[1]-1 && 
             ball_min_x < piston_obj.center[0]+1 && ball_max_x > piston_obj.center[0]-1){
-            this.piston_vec = piston_obj.direction;
+            this.piston_vec[index] = piston_obj.direction;
+            this.current_pistons[index] = 1; 
+            console.log(piston_obj);
         } else {
-            this.piston_vec = Vec.of(0,0,0);
+            this.piston_vec[index] = Vec.of(0,0,0);
+            this.current_pistons[index] = 0;
         }
       }  
+    check_goal_collision(goal_obj, ball_max_x, ball_min_x, ball_max_y, ball_min_y, ball_vel_x, ball_vel_y, ball_vel_mag) {
+      // Bools describing whether each edge of the ball overlaps with this goal_obj
+        var bottom_overlap = (ball_min_y < goal_obj.max_y && ball_min_y > goal_obj.min_y);
+        var top_overlap = (ball_max_y < goal_obj.max_y && ball_max_y > goal_obj.min_y);
+        var left_overlap = (ball_min_x < goal_obj.max_x && ball_min_x > goal_obj.min_x);
+        var right_overlap = (ball_max_x < goal_obj.max_x && ball_max_x > goal_obj.min_x);
+
+        // LEVEL DONE: Checking for ANY OVERLAP of ball inside map platform
+        if ((bottom_overlap && !top_overlap && ((ball_max_x + 0.1 < goal_obj.max_x && ball_max_x - 0.1 > goal_obj.min_x) || (ball_min_x + 0.1 < goal_obj.max_x && ball_min_x - 0.1 > goal_obj.min_x)))
+            || (top_overlap && !bottom_overlap && ((ball_max_x < goal_obj.max_x && ball_max_x > goal_obj.min_x) || (ball_min_x < goal_obj.max_x && ball_min_x > goal_obj.min_x)))
+            || (left_overlap && !right_overlap && ((ball_max_y < goal_obj.max_y && ball_max_y > goal_obj.min_y) || (ball_min_y < goal_obj.max_y && ball_min_y > goal_obj.min_y)))
+            || (right_overlap && !left_overlap && ((ball_max_y < goal_obj.max_y && ball_max_y > goal_obj.min_y) || (ball_min_y < goal_obj.max_y && ball_min_y > goal_obj.min_y))) )
+          {
+            this.reset();
+            console.log("hit goal");
+          }
+        else // could not collide
+          return false;   
+    }
     check_all_collisions()
       {
         var ball_vel_x = this.velocity[0];
@@ -219,22 +264,35 @@ class Scene extends Scene_Component
          }
         for (i = 0; i < this.piston_objs.length; i++)
         {
-            this.check_piston_collision(this.piston_objs[i], ball_max_x, ball_min_x, ball_max_y, ball_min_y);
-            if (this.piston_vec[0] != 0 && this.piston_vec[1] != 0)
-                break;
+            this.check_piston_collision(this.piston_objs[i], ball_max_x, ball_min_x, ball_max_y, ball_min_y, i);
+//             if (this.piston_vec[0] != 0 && this.piston_vec[1] != 0)
+//                 break;
         }
+
+        this.check_goal_collision(this.goal_obj, ball_max_x, ball_min_x, ball_max_y, ball_min_y);
       }
+    reset() {
+        this.x = 0; 
+        this.y = -4; 
+        this.z = -4;
+        this.px = 0;
+        this.py = 0;
+        this.x_last = 0; 
+        this.y_last = 0; 
+        this.vi = Vec.of(0,1,0); 
+        this.velocity = Vec.of(0,0,0); 
+    }
     //////////////////////////////////////////////////////////
     // Buttons
     make_control_panel()
       { this.key_triggered_button( "flip", [ "a" ], this.flip );
         this.key_triggered_button( "flip2", [ "d" ], this.flip2 );
         this.key_triggered_button( "piston", [ "w" ], this.piston_push );
-
+        this.key_triggered_button( "reset", ["r"], this.reset );
       }
     //////////////////////////////////////////////////////////
     // Draw Objects
-    draw_objects(graphics_state, box_objs, piston_objs, ball_transform)
+    draw_objects(graphics_state, box_objs, piston_objs, goal_obj, ball_transform)
       {
         var i;
         for (i = 0; i < box_objs.length; i++)
@@ -247,10 +305,16 @@ class Scene extends Scene_Component
 
         for (i = 0; i < piston_objs.length; i++){
           let temp_transform = piston_objs[i].model_transform.times(Mat4.translation([ 0, this.piston_pos, 0 ]));
-          this.shapes.box.draw( graphics_state, temp_transform, this.materials.box_blueGlow_phong );
+          this.shapes.box.draw( graphics_state, temp_transform, this.materials.piston );
         }
                 
         this.shapes.ball.draw( graphics_state, ball_transform, this.materials.ball_redGlow_phong );
+
+        let box_transform = Mat4.identity();
+        box_transform = box_transform.times( Mat4.scale( [ 120, 120, 120 ] ) );
+        this.shapes.box.draw( graphics_state, box_transform, this.materials.skybox );
+
+        this.shapes.torus.draw( graphics_state, goal_obj.model_transform, this.materials.goal);
       }
     //////////////////////////////////////////////////////////
     // Update Camera
@@ -279,7 +343,8 @@ class Scene extends Scene_Component
         
         //draw objects
         let ball_transform = Mat4.identity().times(Mat4.translation([ this.x, this.y, this.z ]) )
-        this.draw_objects(graphics_state, this.map_objs, this.piston_objs, ball_transform);
+        this.goal_obj.model_transform = this.goal_obj.model_transform.times( Mat4.rotation(dt * 2 , Vec.of( 0, 0, 1 ) ) );
+        this.draw_objects(graphics_state, this.map_objs, this.piston_objs, this.goal_obj, ball_transform);
        
         //update camera
         this.update_camera(graphics_state, ball_transform);

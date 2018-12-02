@@ -29,6 +29,21 @@ class Piston_GameObject
     }
 }
 
+class Goal_GameObject
+{
+  constructor(position)
+  {
+    this.center = position;
+    this.max_x = this.center[0] + 1;
+    this.min_x = this.center[0] - 1;
+    this.max_y = this.center[1] + 1;
+    this.min_y = this.center[1] - 1;
+    console.log(this.max_x, this.min_x, this.max_y, this.min_y);
+
+    this.model_transform = Mat4.identity().times( Mat4.translation(position) );
+  }
+}
+
 // Garret's Dependencies
 window.Triangle = window.classes.Triangle =
 class Triangle extends Shape    // The simplest possible Shape – one triangle.  It has 3 vertices, each
