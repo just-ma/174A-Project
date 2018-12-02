@@ -16,7 +16,7 @@ class Scene extends Scene_Component
         this.submit_shapes( context, shapes );
 
         this.materials =
-          { phong: context.get_instance( Phong_Shader ).material( Color.of( 0.7,0,0,1 ), {ambient:0.05}, { specular:1.0 } ),
+          { phong: context.get_instance( Phong_Shader ).material( Color.of( 0,0,0,1 ), {ambient:1, texture: context.get_instance( "assets/rock_repeating.jpg", false )}, { specular:1.0 } ),
             ball_redGlow_phong: context.get_instance( Phong_Shader ).material( Color.of( 1,0,0,1 ), {ambient:1.0}, { diffuse:0.0 }, { specular:0.0 } ),
             box_blueGlow_phong: context.get_instance( Phong_Shader ).material( Color.of( 0,0.5,0.5,1 ), {ambient:0.15}, { diffuse:0.0 }, { specular:1.0 } ),
           }
@@ -29,6 +29,7 @@ class Scene extends Scene_Component
         // Ball (moving)
         this.x = 0; // current x pos
         this.y = 0; // current y pos
+        this.z = 0; // current z pos
         this.z = -4 // locked z pos
         this.px = 0; // previous frame x pos
         this.py = 0; // previous frame y pos
@@ -52,13 +53,14 @@ class Scene extends Scene_Component
         this.map_objs = [
             //                         (position)           (scale)
             new Map_GameObject(Vec.of( 0, -4, -4 ), Vec.of( 10, 1, 2 )),
-            new Map_GameObject(Vec.of( -8, 0, -4 ), Vec.of( 1, 5, 2 )),
+            new Map_GameObject(Vec.of( 0, 0, -8 ), Vec.of( 1, 5, 2 ))
         ] 
         // Piston Objects (static)
         this.piston_objs = [
             //                           (position)     (rotation)  (power)
             new Piston_GameObject(Vec.of( 6, 0, -4 ), Math.PI / 3,    20),
-            new Piston_GameObject(Vec.of( -6, 3, -4 ), -Math.PI / 2,  15)
+            new Piston_GameObject(Vec.of( -6, 3, -4 ), -Math.PI / 2,  15),
+            new Piston_GameObject(Vec.of( 0, -4, -2 ), 0,  15),
 
         ]
 
@@ -87,10 +89,10 @@ class Scene extends Scene_Component
         this.time_last = this.time;
     }
     flip() {
-        this.add_force( Vec.of(-5,10,0) );
+        this.add_force( Vec.of(-5,2,0) );
       }
     flip2() {
-        this.add_force( Vec.of(5,10,0) );
+        this.add_force( Vec.of(5,2,0) );
       }
     run_newtonian_physics(t)
     {
@@ -106,7 +108,7 @@ class Scene extends Scene_Component
         if (this.velocity < this.min_vel_possible_before_zero)
             this.velocity = 0;
     }
-    check_collision(map_obj, ball_max_x, ball_min_x, ball_max_y, ball_min_y, ball_vel_x, ball_vel_y, ball_vel_mag)
+    check_collision(map_obj, ball_max_x, ball_min_x, ball_max_y, ball_min_y, ball_vel_x, ball_vel_y, ball_vel_mag, ball_max_z, ball_min_z)
       { /*
         if (this.y < -2){
             this.velocity[0] *= 0.8;
@@ -123,17 +125,20 @@ class Scene extends Scene_Component
         var top_overlap = (ball_max_y < map_obj.max_y && ball_max_y > map_obj.min_y);
         var left_overlap = (ball_min_x < map_obj.max_x && ball_min_x > map_obj.min_x);
         var right_overlap = (ball_max_x < map_obj.max_x && ball_max_x > map_obj.min_x);
-       
+
+        // Bool describing if an object exists in front or behind the ball currently
+        var object_front_back = ( (bottom_overlap || top_overlap || right_overlap || left_overlap) && 
+             !(ball_min_z < map_obj.max_z && ball_min_z > map_obj.min_z) && !(ball_max_z < map_obj.max_z && ball_max_z > map_obj.min_z));
         
         // BOUNCE REVERSE: Checking for FULL OVERLAP of ball inside map platform
-        if (bottom_overlap && top_overlap && right_overlap && left_overlap)
+        if (bottom_overlap && top_overlap && right_overlap && left_overlap && !object_front_back)
           {
             dont_flip_x_dir_sign = -1;
             dont_flip_y_dir_sign = -1;
             // Don't know where to reset position to
           }
         // BOUNCE to UP: Bottom of ball is overlapping
-        if (bottom_overlap && !top_overlap && ball_vel_y < 0 &&
+        if (bottom_overlap && !top_overlap && ball_vel_y < 0 && !object_front_back &&
             ((ball_max_x + 0.1 < map_obj.max_x && ball_max_x - 0.1 > map_obj.min_x) || (ball_min_x + 0.1 < map_obj.max_x && ball_min_x - 0.1 > map_obj.min_x))) // checking within x-range
           {
             dont_flip_x_dir_sign = 1;
@@ -142,7 +147,7 @@ class Scene extends Scene_Component
             console.log("overlap bot");
           }
         // BOUNCE to DOWN: Top of ball is overlapping
-        else if (top_overlap && !bottom_overlap && ball_vel_y > 0 &&
+        else if (top_overlap && !bottom_overlap && ball_vel_y > 0 && !object_front_back &&
             ((ball_max_x < map_obj.max_x && ball_max_x > map_obj.min_x) || (ball_min_x < map_obj.max_x && ball_min_x > map_obj.min_x))) // checking within x-range
           {
             dont_flip_x_dir_sign = 1;
@@ -151,7 +156,7 @@ class Scene extends Scene_Component
             console.log("overlap top");
           }
         // BOUNCE to the RIGHT: Left of ball is overlapping
-        else if (left_overlap && !right_overlap &&
+        else if (left_overlap && !right_overlap && !object_front_back &&
             ((ball_max_y < map_obj.max_y && ball_max_y > map_obj.min_y) || (ball_min_y < map_obj.max_y && ball_min_y > map_obj.min_y))) // checking within y-range
           {
             dont_flip_x_dir_sign = -1;
@@ -160,7 +165,7 @@ class Scene extends Scene_Component
             console.log("overlap left");
           }
         // BOUNCE to the LEFT: Right of ball is overlapping
-        else if (right_overlap && !left_overlap &&
+        else if (right_overlap && !left_overlap && !object_front_back &&
             ((ball_max_y < map_obj.max_y && ball_max_y > map_obj.min_y) || (ball_min_y < map_obj.max_y && ball_min_y > map_obj.min_y))) // checking within y-range
           {
             dont_flip_x_dir_sign = -1;
@@ -199,13 +204,15 @@ class Scene extends Scene_Component
         var ball_min_x = this.x - this.ball_radius;
         var ball_max_y = this.y + this.ball_radius;
         var ball_min_y = this.y - this.ball_radius;
+        var ball_max_z = this.z + this.ball_radius;
+        var ball_min_z = this.z - this.ball_radius;
         
         var collided = false;
         
         var i;
         for (i = 0; i < this.map_objs.length; i++)
          {
-            this.check_collision(this.map_objs[i], ball_max_x, ball_min_x, ball_max_y, ball_min_y, ball_vel_x, ball_vel_y, ball_vel_mag);
+            this.check_collision(this.map_objs[i], ball_max_x, ball_min_x, ball_max_y, ball_min_y, ball_vel_x, ball_vel_y, ball_vel_mag, ball_max_z, ball_min_z);
             collided = (ball_vel_x != this.velocity[0] && ball_vel_y != this.velocity[1]);
             if (collided)
              break;

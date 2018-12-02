@@ -7,6 +7,8 @@ class Map_GameObject
       this.min_x = this.center[0] - Math.abs(scale[0]);
       this.max_y = this.center[1] + Math.abs(scale[1]);
       this.min_y = this.center[1] - Math.abs(scale[1]);
+      this.max_z = this.center[2] + Math.abs(scale[2]);
+      this.min_z = this.center[2] - Math.abs(scale[2]);
       
       this.detect_radius = Math.abs(scale[0]) + Math.abs(scale[1]);
 
