@@ -12,13 +12,13 @@ class Scene extends Scene_Component
 
         const shapes = { box:   new Cube(),
                          ball:  new Subdivision_Sphere(5),
-                         torus:  new Torus( 3, 3 )
+                         torus:  new Torus( 3, 3 ),
                        }
         this.submit_shapes( context, shapes );
 
         this.materials =
           { phong: context.get_instance( Phong_Shader ).material( Color.of( 0,0,0,1 ), {ambient:1, texture: context.get_instance( "assets/square.png", false )}, { specular:1.0 } ),
-            skybox: context.get_instance( Phong_Shader ).material( Color.of( 0,0,1,1 ), {ambient:1, texture: context.get_instance( "assets/skybox.jpg", true )}),
+            skybox: context.get_instance( Texture_Rotate ).material( Color.of( 0,0,0,1 ), {ambient:1, texture: context.get_instance( "assets/skybox.jpg", true )}),
             ball_redGlow_phong: context.get_instance( Phong_Shader ).material( Color.of( 0,0,0,1 ), {ambient:1.0, texture: context.get_instance( "assets/ball.png", false )} ),
             piston: context.get_instance( Phong_Shader ).material( Color.of( 0,0,0,1 ), {ambient:1, texture: context.get_instance( "assets/piston.png", true )} ),
             goal: context.get_instance ( Phong_Shader ).material( Color.of( 0,0,0,.8 ), {ambient:1, texture: context.get_instance( "assets/goal.png", true )} ),
@@ -381,7 +381,7 @@ class Scene extends Scene_Component
         }
 
         let box_transform = Mat4.identity();
-        box_transform = box_transform.times( Mat4.scale( [ 120, 120, 120 ] ) );
+        box_transform = box_transform.times( Mat4.scale( [ 256, 256, 256 ] ) );
         this.shapes.box.draw( graphics_state, box_transform, this.materials.skybox );
 
         this.shapes.torus.draw( graphics_state, goal_obj.model_transform, this.materials.goal);
@@ -427,3 +427,39 @@ class Scene extends Scene_Component
         this.update_camera(graphics_state, ball_transform);
       }
   }
+
+class Texture_Rotate extends Phong_Shader
+{ fragment_glsl_code()           // ********* FRAGMENT SHADER ********* 
+    {
+      return `
+        uniform sampler2D texture;
+        void main()
+        { if( GOURAUD || COLOR_NORMALS )    // Do smooth "Phong" shading unless options like "Gouraud mode" are wanted instead.
+          { gl_FragColor = VERTEX_COLOR;    // Otherwise, we already have final colors to smear (interpolate) across vertices.            
+            return;
+          }
+
+          float rps = mod(animation_time * 3.14 / 20.0, 2.0 * 3.14);
+    
+          mat3 inverse_translation_matrix = mat3(1.0, 0.0, 0.0,  0.0, 1.0, 0.0,  -0.5, -0.5, 1.0);
+          vec3 texture_coord0 = inverse_translation_matrix * vec3(f_tex_coord.x, f_tex_coord.y, 1.0);
+
+          
+          mat3 rotation_matrix = mat3(cos(rps), sin(rps), 0.0,  -sin(rps), cos(rps), 0.0,  0.0, 0.0, 1.0);
+          vec3 texture_coord1 = rotation_matrix * texture_coord0;
+            
+          mat3 translation_matrix = mat3(1.0, 0.0, 0.0,  0.0, 1.0, 0.0,  0.5, 0.5, 1.0);
+          vec3 texture_coord2 = translation_matrix * texture_coord1;
+
+          vec2 f_tex_coord2 = vec2(texture_coord2.x/texture_coord2.z, texture_coord2.y/texture_coord2.z);
+
+                                           // If we get this far, calculate Smooth "Phong" Shading as opposed to Gouraud Shading.
+                                            // Phong shading is not to be confused with the Phong Reflection Model.
+          vec4 tex_color = texture2D( texture, f_tex_coord2 );                         // Sample the texture image in the correct place.
+                                                                                      // Compute an initial (ambient) color:
+          if( USE_TEXTURE ) gl_FragColor = vec4( ( tex_color.xyz + shapeColor.xyz ) * ambient, shapeColor.w * tex_color.w ); 
+          else gl_FragColor = vec4( shapeColor.xyz * ambient, shapeColor.w );
+          gl_FragColor.xyz += phong_model_lights( N );                     // Compute the final color with contributions from lights.
+        }`;
+    }
+}
