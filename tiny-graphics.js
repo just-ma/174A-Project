@@ -513,19 +513,19 @@ class Scene_Component       // The Scene_Component superclass is the base class 
              event.stopPropagation();   // Don't bubble the event to parent nodes; let child elements be targetted in isolation.
            }
       Object.assign( this, { key_controls: new Keyboard_Manager( document, callback_behavior), globals: webgl_manager.globals } );
-      control_box.appendChild( Object.assign( document.createElement("div"), { textContent: this.constructor.name, className: "control-title" } ) )
-      this.control_panel = control_box.appendChild( document.createElement( "div" ) );
-      this.control_panel.className = "control-div";        
+      //control_box.appendChild( Object.assign( document.createElement("div") ) )
+      this.control_panel = control_box;
+      //this.control_panel.className = "control-div";        
     }
-  new_line( parent=this.control_panel ) { parent.appendChild( document.createElement( "br" ) ) }    // Format a scene's control panel.
-  live_string( callback, parent=this.control_panel )    // Create an element somewhere in the control panel that does reporting of the
-    {                                                   // scene's values in real time.  The event loop will constantly update all HTML 
-                                                        // elements made this way.
-      parent.appendChild( Object.assign( document.createElement( "div"  ), { className:"live_string", onload: callback } ) );
-    }
+  //new_line( parent=this.control_panel ) { parent.appendChild( document.createElement( "br" ) ) }    // Format a scene's control panel.
+//   live_string( callback, parent=this.control_panel )    // Create an element somewhere in the control panel that does reporting of the
+//     {                                                   // scene's values in real time.  The event loop will constantly update all HTML 
+//                                                         // elements made this way.
+//       parent.appendChild( Object.assign( document.createElement( "div"  ), { className:"live_string", onload: callback } ) );
+//     }
   key_triggered_button( description, shortcut_combination, callback, color = '#'+Math.random().toString(9).slice(-6), 
                         release_event, recipient = this, parent = this.control_panel )      // Trigger any scene behavior by assigning a key
-    { const button = parent.appendChild( document.createElement( "button" ) );              // shortcut and a labelled HTML button to it.
+    { const button = document.createElement( "button" );              // shortcut and a labelled HTML button to it.
       button.default_color = button.style.backgroundColor = color;
       const  press = () => { Object.assign( button.style, { 'background-color' : 'red', 
                                                             'z-index': "1", 'transform': "scale(2)" } );

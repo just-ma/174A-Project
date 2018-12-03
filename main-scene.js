@@ -339,10 +339,10 @@ class Scene extends Scene_Component
     //////////////////////////////////////////////////////////
     // Buttons
     make_control_panel()
-      { this.key_triggered_button( "flip", [ "a" ], this.flip );
-        this.key_triggered_button( "flip2", [ "d" ], this.flip2 );
-        this.key_triggered_button( "piston", [ "w" ], this.piston_push );
-        this.key_triggered_button( "reset", ["r"], this.reset );
+      { this.key_triggered_button( "Move Left", [ "a" ], this.flip );
+        this.key_triggered_button( "Move Right", [ "d" ], this.flip2 );
+        this.key_triggered_button( "Pistons", [ "w" ], this.piston_push );
+        this.key_triggered_button( "Reset", ["r"], this.reset );
 
         this.result_img = this.control_panel.appendChild( Object.assign( document.createElement( "img" ), 
                 { style:"width:200px; height:" + 200 * this.aspect_ratio + "px" } ) );
