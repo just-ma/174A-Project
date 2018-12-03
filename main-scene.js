@@ -25,15 +25,15 @@ class Scene extends Scene_Component
         this.texture.image.src = "data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7";
 
         this.materials =
-          { phong: context.get_instance( Phong_Shader ).material( Color.of( 0,0,0,1 ), {ambient:1, texture: context.get_instance( "assets/square.png", false )}, { specular:1.0 } ),
+          { phong: context.get_instance( Fake_Bump_Map ).material( Color.of( 0,0,0,1 ), {ambient:1, texture: context.get_instance( "assets/square.png", false )}, { specular:1.0 } ),
             skybox: context.get_instance( Texture_Rotate ).material( Color.of( 0,0,0,1 ), {ambient:1, texture: context.get_instance( "assets/skybox.jpg", true )}),
-            ball_redGlow_phong: context.get_instance( Phong_Shader ).material( Color.of( 0,0,0,1 ), {ambient:1.0, texture: context.get_instance( "assets/ball.png", false )} ),
-            piston: context.get_instance( Phong_Shader ).material( Color.of( 0,0,0,1 ), {ambient:1, texture: context.get_instance( "assets/piston.png", true )} ),
-            goal: context.get_instance ( Phong_Shader ).material( Color.of( 0,0,0,.8 ), {ambient:1, texture: context.get_instance( "assets/goal.png", true )} ),
-            bad_block: context.get_instance ( Phong_Shader ).material( Color.of( 0,0,0,.8 ), {ambient:1, texture: context.get_instance( "assets/bad_block.png", false )} ),
-            red_flash: context.get_instance ( Phong_Shader ).material( Color.of( 1,0,0,.9 ), {ambient:1} ),
-            green_flash: context.get_instance ( Phong_Shader ).material( Color.of( 0,1,0,.9 ), {ambient:1} ),
-            back_box: context.get_instance ( Phong_Shader ).material( Color.of(.7, .7, .7, .7 ), {ambient:1} ),
+            ball_redGlow_phong: context.get_instance( Fake_Bump_Map ).material( Color.of( 0,0,0,1 ), {ambient:1.0, texture: context.get_instance( "assets/ball.png", false )} ),
+            piston: context.get_instance( Fake_Bump_Map ).material( Color.of( 0,0,0,1 ), {ambient:1, texture: context.get_instance( "assets/piston.png", true )} ),
+            goal: context.get_instance ( Fake_Bump_Map ).material( Color.of( 0,0,0,.8 ), {ambient:1, texture: context.get_instance( "assets/goal.png", true )} ),
+            bad_block: context.get_instance ( Fake_Bump_Map ).material( Color.of( 0,0,0,.8 ), {ambient:1, texture: context.get_instance( "assets/bad_block.png", false )} ),
+            red_flash: context.get_instance ( Fake_Bump_Map ).material( Color.of( 1,0,0,.9 ), {ambient:1} ),
+            green_flash: context.get_instance ( Fake_Bump_Map ).material( Color.of( 0,1,0,.9 ), {ambient:1} ),
+            back_box: context.get_instance ( Fake_Bump_Map ).material( Color.of(.7, .7, .7, .7 ), {ambient:1} ),
             shadow: context.get_instance(Phong_Shader).material( Color.of( 0, 0, 0,1 ), { ambient: 1, texture: this.texture }, {specular: 1.0} ),
           }
 
@@ -477,6 +477,29 @@ class Texture_Rotate extends Phong_Shader
           if( USE_TEXTURE ) gl_FragColor = vec4( ( tex_color.xyz + shapeColor.xyz ) * ambient, shapeColor.w * tex_color.w ); 
           else gl_FragColor = vec4( shapeColor.xyz * ambient, shapeColor.w );
           gl_FragColor.xyz += phong_model_lights( N );                     // Compute the final color with contributions from lights.
+        }`;
+    }
+}
+
+class Fake_Bump_Map extends Phong_Shader                         // Same as Phong_Shader, except this adds one line of code.
+{ fragment_glsl_code()           // ********* FRAGMENT SHADER ********* 
+    { return `
+        uniform sampler2D texture;
+        void main()
+        { if( GOURAUD || COLOR_NORMALS )    // Do smooth "Phong" shading unless options like "Gouraud mode" are wanted instead.
+          { gl_FragColor = VERTEX_COLOR;    // Otherwise, we already have final colors to smear (interpolate) across vertices.            
+            return;
+          }                                 // If we get this far, calculate Smooth "Phong" Shading as opposed to Gouraud Shading.
+                                            // Phong shading is not to be confused with the Phong Reflection Model.
+          
+          vec4 tex_color = texture2D( texture, f_tex_coord );                    // Use texturing as well.
+          vec3 bumped_N  = normalize( N + tex_color.rgb - .5*vec3(1,1,1) );      // Slightly disturb normals based on sampling
+                                                                                 // the same image that was used for texturing.
+                                                                                 
+                                                                                 // Compute an initial (ambient) color:
+          if( USE_TEXTURE ) gl_FragColor = vec4( ( tex_color.xyz + shapeColor.xyz ) * ambient, shapeColor.w * tex_color.w ); 
+          else gl_FragColor = vec4( shapeColor.xyz * ambient, shapeColor.w );
+          gl_FragColor.xyz += phong_model_lights( bumped_N );                    // Compute the final color with contributions from lights.
         }`;
     }
 }
