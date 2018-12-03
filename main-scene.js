@@ -25,6 +25,7 @@ class Scene extends Scene_Component
             bad_block: context.get_instance ( Phong_Shader ).material( Color.of( 0,0,0,.8 ), {ambient:1, texture: context.get_instance( "assets/bad_block.png", false )} ),
             red_flash: context.get_instance ( Phong_Shader ).material( Color.of( 1,0,0,.9 ), {ambient:1} ),
             green_flash: context.get_instance ( Phong_Shader ).material( Color.of( 0,1,0,.9 ), {ambient:1} ),
+            back_box: context.get_instance ( Phong_Shader ).material( Color.of(.7, .7, .7, .7 ), {ambient:1} ),
           }
 
         this.lights = [ new Light( Vec.of( -2,2,0,1 ), Color.of( 0,0,1,1 ), 0 ) ];
@@ -60,6 +61,7 @@ class Scene extends Scene_Component
             new Map_GameObject(Vec.of( 8, -2, -4 ), Vec.of( 2, 2, 2 )), //pillar 1
             new Map_GameObject(Vec.of( 12, 0, -4 ), Vec.of( 2, 5, 2 )), //pillar 2
             new Map_GameObject(Vec.of( 18, 6, -4 ), Vec.of( 1, 6, 2 )), //pillar 3
+            new Map_GameObject(Vec.of( 15.5, 4, -1 ), Vec.of( .5, 10, 1 )), //depth pillars
         ] 
 
         // Piston Objects (static)
@@ -386,6 +388,10 @@ class Scene extends Scene_Component
 
         for (i = 0; i < bad_blocks.length; i++)
           this.shapes.box.draw( graphics_state, bad_blocks[i].model_transform, this.materials.bad_block );
+
+        let back_transform = Mat4.identity();
+        back_transform = back_transform.times(Mat4.translation([8, 4, -7])).times( Mat4.scale( [ 11, 8, 1 ] ) );
+        this.shapes.box.draw( graphics_state, back_transform, this.materials.back_box );
       }
     //////////////////////////////////////////////////////////
     // Update Camera
