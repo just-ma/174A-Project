@@ -428,22 +428,36 @@ class Scene extends Scene_Component
         this.check_all_collisions();
 
         // Put light inside ball 
-        graphics_state.lights = [ new Light( Vec.of( this.x,this.y,this.z,1 ), Color.of( 1,0,0,1 ), 1000) , this.lights[0] ];
+        graphics_state.lights = [ new Light( Vec.of( this.x,this.y,this.z,1 ), Color.of( 1,1,0,1 ), 100000), this.lights[0] ];
+         
+        this.current_view = graphics_state.camera_transform;
+        graphics_state.camera_transform = Mat4.identity();
         
         //draw objects
         let ball_transform = Mat4.identity().times(Mat4.translation([ this.x, this.y, this.z ]) )
         this.goal_obj.model_transform = this.goal_obj.model_transform.times( Mat4.rotation(dt * 2 , Vec.of( 0, 0, 1 ) ) );
         this.draw_objects(graphics_state, this.map_objs, this.piston_objs, this.goal_obj, this.bad_blocks, ball_transform, t);
-       
+        
+        
+        this.scratchpad_context.drawImage( this.webgl_manager.canvas, 0, 0, 256, 256 );
+        this.texture.image.src = this.result_img.src = this.scratchpad.toDataURL("image/png");
+                                        // Clear the canvas and start over, beginning scene 2:
+        this.webgl_manager.gl.clear( this.webgl_manager.gl.COLOR_BUFFER_BIT | this.webgl_manager.gl.DEPTH_BUFFER_BIT);
+
+        //SCENE 2 RENDER
+        graphics_state.camera_transform = this.current_view;
+        
+        //draw objects
+        ball_transform = Mat4.identity().times(Mat4.translation([ this.x, this.y, this.z ]) )
+        this.goal_obj.model_transform = this.goal_obj.model_transform.times( Mat4.rotation(dt * 2 , Vec.of( 0, 0, 1 ) ) );
+        this.draw_objects(graphics_state, this.map_objs, this.piston_objs, this.goal_obj, this.bad_blocks, ball_transform, t);
+        
         //update camera
         this.update_camera(graphics_state, ball_transform);
 
-        //this.scratchpad_context.drawImage( this.webgl_manager.canvas, 0, 0, 256, 256 );
-        //this.texture.image.src = this.result_img.src = this.scratchpad.toDataURL("image/png");
-                                        // Clear the canvas and start over, beginning scene 2:
-        //this.webgl_manager.gl.clear( this.webgl_manager.gl.COLOR_BUFFER_BIT | this.webgl_manager.gl.DEPTH_BUFFER_BIT);
       }
   }
+
 
 class Texture_Rotate extends Phong_Shader
 { fragment_glsl_code()           // ********* FRAGMENT SHADER ********* 
