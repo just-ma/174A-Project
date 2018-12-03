@@ -61,26 +61,78 @@ class Scene extends Scene_Component
 
         // Map Objects (static)
         this.map_objs = [
-            //                         (position)           (scale)
-            new Map_GameObject(Vec.of( 9, -4, -4 ), Vec.of( 14, 1, 2 )), //bottom
-            new Map_GameObject(Vec.of( 32, -4, -4 ), Vec.of( 2, 1, 2 )),
+            //0                         (position)           (scale)
+            new Map_GameObject(Vec.of( 15, -4, -4 ), Vec.of( 20, 1, 2 )), //bottom
             new Map_GameObject(Vec.of( -4, 4, -4 ), Vec.of( 1, 8, 2 )), //left
             new Map_GameObject(Vec.of( 34, 4, -4 ), Vec.of( 1, 8, 2 )), //right
             new Map_GameObject(Vec.of( 15, 12, -4 ), Vec.of( 20, 1, 2 )), //top
             new Map_GameObject(Vec.of( 8, -2, -4 ), Vec.of( 2, 2, 2 )), //pillar 1
             new Map_GameObject(Vec.of( 12, 0, -4 ), Vec.of( 2, 5, 2 )), //pillar 2
             new Map_GameObject(Vec.of( 18, 6, -4 ), Vec.of( 1, 6, 2 )), //pillar 3
-            new Map_GameObject(Vec.of( 15.5, 4, -1 ), Vec.of( .5, 10, 1 )), //depth pillars
+            
+            //1                         (position)           (scale)
+            new Map_GameObject(Vec.of( -22, -34, -4 ), Vec.of( 4, 1, 2 )), //bottom
+            new Map_GameObject(Vec.of( -11, -34, -4 ), Vec.of( 2, 1, 2 )), //bottom
+            new Map_GameObject(Vec.of( 0, -34, -4 ), Vec.of( 4, 1, 2 )), //bottom
+            new Map_GameObject(Vec.of( -26, -27, -4 ), Vec.of( 1, 8, 2 )), //left
+            new Map_GameObject(Vec.of( 4, -27, -4 ), Vec.of( 1, 8, 2 )), //right
+            new Map_GameObject(Vec.of( -11, -20, -4 ), Vec.of( 16, 1, 2 )), //top
+            new Map_GameObject(Vec.of( -15.5, -32, -8 ), Vec.of( 3, 6, 2 )), //depth pillars
+            new Map_GameObject(Vec.of( -6.5 , -32, -8 ), Vec.of( 3, 6, 2 )), 
+            new Map_GameObject(Vec.of( -15.5 , -32, -2 ), Vec.of( .5, 6, .5 )), 
+            new Map_GameObject(Vec.of( -6.5 , -32, -2 ), Vec.of( .5, 6, .5 )), 
+            new Map_GameObject(Vec.of( -15.5 , -28, -2 ), Vec.of( .5, .5, 2 )), 
+            new Map_GameObject(Vec.of( -6.5 , -28, -2 ), Vec.of( .5, .5, 2 )),
+
+            //2                         (position)           (scale)
+            new Map_GameObject(Vec.of( 36, -34, -4 ), Vec.of( 6, 1, 2 )), //bottom
+            new Map_GameObject(Vec.of( 57, -34, -4 ), Vec.of( 4, 1, 2 )), //bottom
+            new Map_GameObject(Vec.of( 31, -27, -4 ), Vec.of( 1, 8, 2 )), //left
+            new Map_GameObject(Vec.of( 62, -27, -4 ), Vec.of( 1, 8, 2 )), //right
+            new Map_GameObject(Vec.of( 46, -20, -4 ), Vec.of( 16, 1, 2 )), //top
+            new Map_GameObject(Vec.of( 42, -31, -4 ), Vec.of( 1, 4, 2 )), //pillar 1
+            new Map_GameObject(Vec.of( 54, -31, -4 ), Vec.of( 1, 4, 2 )), //pillar 2
+            new Map_GameObject(Vec.of( 44, -28, -8 ), Vec.of( 2, 6, 1 )), //depth pillars
+            new Map_GameObject(Vec.of( 54, -28, -8 ), Vec.of( 2, 6, 1 )),
+            new Map_GameObject(Vec.of( 48, -28, -8 ), Vec.of( 6, .5, .5 )),
+            new Map_GameObject(Vec.of( 48, -26, -8 ), Vec.of( 6, .5, .5 )),
+            new Map_GameObject(Vec.of( 48, -24, -8 ), Vec.of( 6, .5, .5 )),
         ] 
 
         // Piston Objects (static)
         this.piston_objs = [
-            //                           (position)     (rotation)  (power)
+            //0                           (position)     (rotation)  (power)
             new Piston_GameObject(Vec.of( 4, -3, -4 ), 0,  15),
             new Piston_GameObject(Vec.of( 8, 0, -4 ), 0,  15),
             new Piston_GameObject(Vec.of( 22, -3, -4 ), -Math.PI  / 8,  15),
             new Piston_GameObject(Vec.of( 30, 1, -4 ), Math.PI  / 8,  15),
             new Piston_GameObject(Vec.of( 26, 5, -4 ), -Math.PI  / 8,  15),
+
+            //1                           (position)     (rotation)  (power)
+            new Piston_GameObject(Vec.of( -20, -33, -4 ), -Math.PI  / 8,  8),
+            new Piston_GameObject(Vec.of( -11, -33, -4 ), -Math.PI  / 8,  8),
+
+            //2                           (position)     (rotation)  (power)
+            new Piston_GameObject(Vec.of( 36, -33, -4 ), -Math.PI  / 8,  15),
+            new Piston_GameObject(Vec.of( 38, -29, -4 ), -Math.PI  / 8,  15),
+            new Piston_GameObject(Vec.of( 48, -28, -4 ), -Math.PI  / 8,  15),
+        ]
+
+        // Goal Object (static)               (position)
+        this.goal_objs = [
+            new Goal_GameObject(Vec.of(30, 8, -4), 0),
+            new Goal_GameObject(Vec.of(0, -31, -4), 1),
+            new Goal_GameObject(Vec.of(58, -31, -4), 2),
+        ]
+
+        // Bad Blocks (static)
+        this.bad_blocks = [
+            //1                         (position)           (scale)                               
+            new Bad_Block_GameObject(Vec.of( -15.5, -36, -4 ), Vec.of( 3, 1, 2 )),
+            new Bad_Block_GameObject(Vec.of( -6.5 , -36, -4 ), Vec.of( 3, 1, 2 )),
+
+            //2                         (position)           (scale)         
+            new Bad_Block_GameObject(Vec.of( 48 , -31, -4 ), Vec.of( 6, 1, 2 ))
         ]
 
         this.piston_pos = 0; // current piston position
@@ -93,22 +145,16 @@ class Scene extends Scene_Component
             this.piston_vec[i] = Vec.of(0,0,0);
             this.current_pistons[i] = 0;
         }
-        
-        // Goal Object (static)               (position)
-        this.goal_obj = new Goal_GameObject(Vec.of(30, 8, -4));
-
-        // Bad Blocks (static)
-        this.bad_blocks = [
-            //                         (position)           (scale)                               
-            new Bad_Block_GameObject(Vec.of(26, -5, -4), Vec.of(4, 1, 2))
-        ]
-
+  
         //visual color changes for skybox to show special blocks hit
         this.red_flash = 0;
         this.green_flash = 0;
         this.red_flash_time = 0;
         this.green_flash_time = 0;
         this.flash_duration = .15;
+
+        //which level are we on
+        this.level = 0;
       }
     //////////////////////////////////////////////////////////
     // Piston Functions
@@ -258,7 +304,12 @@ class Scene extends Scene_Component
             || (left_overlap && !right_overlap && ((ball_max_y < goal_obj.max_y && ball_max_y > goal_obj.min_y) || (ball_min_y < goal_obj.max_y && ball_min_y > goal_obj.min_y)))
             || (right_overlap && !left_overlap && ((ball_max_y < goal_obj.max_y && ball_max_y > goal_obj.min_y) || (ball_min_y < goal_obj.max_y && ball_min_y > goal_obj.min_y))) )
           {
-            this.reset();
+            if (this.level == 2) {
+                this.level = 0;
+            } else {
+                this.level++;
+            }
+            this.reset_local();
             this.green_flash = 1;
             //console.log("hit goal");
           }
@@ -279,7 +330,7 @@ class Scene extends Scene_Component
             || (left_overlap && !right_overlap && ((ball_max_y < bad_blocks.max_y && ball_max_y > bad_blocks.min_y) || (ball_min_y < bad_blocks.max_y && ball_min_y > bad_blocks.min_y)))
             || (right_overlap && !left_overlap && ((ball_max_y < bad_blocks.max_y && ball_max_y > bad_blocks.min_y) || (ball_min_y < bad_blocks.max_y && ball_min_y > bad_blocks.min_y))) )
           {
-            this.reset();
+            this.reset_local();
             this.red_flash = 1;
             //console.log("hit bad block");
           }
@@ -317,24 +368,55 @@ class Scene extends Scene_Component
 //             if (this.piston_vec[0] != 0 && this.piston_vec[1] != 0)
 //                 break;
         }
-
-        this.check_goal_collision(this.goal_obj, ball_max_x, ball_min_x, ball_max_y, ball_min_y);
-
+        
+        for (i = 0; i < this.goal_objs.length; i++) 
+        {
+            this.check_goal_collision(this.goal_objs[i], ball_max_x, ball_min_x, ball_max_y, ball_min_y);
+        }
+        
         for (i = 0; i < this.bad_blocks.length; i++) 
         {
             this.check_bad_block_collision(this.bad_blocks[i], ball_max_x, ball_min_x, ball_max_y, ball_min_y);
         }
       }
-    reset() {
+    reset0() {
         this.x = 0; 
         this.y = -4; 
-        this.z = -4;
         this.px = 0;
         this.py = 0;
         this.x_last = 0; 
-        this.y_last = 0; 
+        this.y_last = -4; 
         this.vi = Vec.of(0,8,0); 
         this.velocity = Vec.of(0,8,0); 
+    }
+    reset1() { 
+        this.x = -24; 
+        this.y = -31; 
+        this.px = -24;
+        this.py = -31;
+        this.x_last = -24; 
+        this.y_last = -31; 
+        this.vi = Vec.of(0,8,0); 
+        this.velocity = Vec.of(0,8,0); 
+    }
+    reset2() {
+        this.x = 34; 
+        this.y = -31; 
+        this.px = 34;
+        this.py = -31;
+        this.x_last = 34; 
+        this.y_last = -31; 
+        this.vi = Vec.of(0,8,0); 
+        this.velocity = Vec.of(0,8,0); 
+    }
+    reset_local() {
+        if (this.level == 0) {
+            this.reset0();
+        } else if (this.level == 1) {
+            this.reset1();
+        } else if (this.level == 2) {
+            this.reset2();
+        }
     }
     //////////////////////////////////////////////////////////
     // Buttons
@@ -342,14 +424,15 @@ class Scene extends Scene_Component
       { this.key_triggered_button( "Move Left", [ "a" ], this.flip );
         this.key_triggered_button( "Move Right", [ "d" ], this.flip2 );
         this.key_triggered_button( "Pistons", [ "w" ], this.piston_push );
-        this.key_triggered_button( "Reset", ["r"], this.reset );
+        this.key_triggered_button( "Reset", ["r"], this.reset0 );
+        this.key_triggered_button( "Reset Local", ["l"], this.reset_local );
 
         this.result_img = this.control_panel.appendChild( Object.assign( document.createElement( "img" ), 
                 { style:"width:200px; height:" + 200 * this.aspect_ratio + "px" } ) );
       }
     //////////////////////////////////////////////////////////
     // Draw Objects
-    draw_objects(graphics_state, box_objs, piston_objs, goal_obj, bad_blocks, ball_transform, t)
+    draw_objects(graphics_state, box_objs, piston_objs, goal_objs, bad_blocks, ball_transform, t)
       {
         var i;
         for (i = 0; i < box_objs.length; i++)
@@ -393,11 +476,12 @@ class Scene extends Scene_Component
         }
 
         let box_transform = Mat4.identity();
-        box_transform = box_transform.times( Mat4.scale( [ 256, 256, 256 ] ) );
+        box_transform = box_transform.times( Mat4.translation( [20, -20, 0 ] ) ).times( Mat4.scale( [ 256, 256, 256 ] ) );
         this.shapes.box.draw( graphics_state, box_transform, this.materials.skybox );
 
-        this.shapes.torus.draw( graphics_state, goal_obj.model_transform, this.materials.goal);
-
+        for (i = 0; i < this.goal_objs.length; i++) 
+            this.shapes.torus.draw( graphics_state, goal_objs[i].model_transform.times( Mat4.rotation(t * 2 , Vec.of( 0, 0, 1 ) ) ), this.materials.goal);
+      
         for (i = 0; i < bad_blocks.length; i++)
           this.shapes.box.draw( graphics_state, bad_blocks[i].model_transform, this.materials.bad_block );
 
@@ -432,8 +516,8 @@ class Scene extends Scene_Component
         
         //draw objects
         let ball_transform = Mat4.identity().times(Mat4.translation([ this.x, this.y, this.z ]) )
-        this.goal_obj.model_transform = this.goal_obj.model_transform.times( Mat4.rotation(dt * 2 , Vec.of( 0, 0, 1 ) ) );
-        this.draw_objects(graphics_state, this.map_objs, this.piston_objs, this.goal_obj, this.bad_blocks, ball_transform, t);
+        
+        this.draw_objects(graphics_state, this.map_objs, this.piston_objs, this.goal_objs, this.bad_blocks, ball_transform, t);
        
         //update camera
         this.update_camera(graphics_state, ball_transform);
