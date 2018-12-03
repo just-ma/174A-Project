@@ -15,6 +15,14 @@ class Scene extends Scene_Component
                          torus:  new Torus( 3, 3 ),
                        }
         this.submit_shapes( context, shapes );
+        
+        this.webgl_manager = context;      // Save off the Webgl_Manager object that created the scene.
+        this.scratchpad = document.createElement('canvas');
+        this.scratchpad_context = this.scratchpad.getContext('2d');     // A hidden canvas for re-sizing the real canvas to be square.
+        this.scratchpad.width   = 256;
+        this.scratchpad.height  = 256;
+        this.texture = new Texture ( context.gl, "", false, false );        // Initial image source: Blank gif file
+        this.texture.image.src = "data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7";
 
         this.materials =
           { phong: context.get_instance( Phong_Shader ).material( Color.of( 0,0,0,1 ), {ambient:1, texture: context.get_instance( "assets/square.png", false )}, { specular:1.0 } ),
@@ -26,6 +34,7 @@ class Scene extends Scene_Component
             red_flash: context.get_instance ( Phong_Shader ).material( Color.of( 1,0,0,.9 ), {ambient:1} ),
             green_flash: context.get_instance ( Phong_Shader ).material( Color.of( 0,1,0,.9 ), {ambient:1} ),
             back_box: context.get_instance ( Phong_Shader ).material( Color.of(.7, .7, .7, .7 ), {ambient:1} ),
+            shadow: context.get_instance(Phong_Shader).material( Color.of( 0, 0, 0,1 ), { ambient: 1, texture: this.texture }, {specular: 1.0} ),
           }
 
         this.lights = [ new Light( Vec.of( -2,2,0,1 ), Color.of( 0,0,1,1 ), 0 ) ];
@@ -41,14 +50,14 @@ class Scene extends Scene_Component
         this.py = 0; // previous frame y pos
         this.x_last = 0; // new origin x for calculating physics
         this.y_last = 0; // new origin y for calculating physics
-        this.vi = Vec.of(0,1,0); // initial velocity
+        this.vi = Vec.of(0,8,0); // initial velocity
         this.time_last = 0; // resetting time to 0 after adding force
-        this.velocity = Vec.of(0,1,0); // current velocity
+        this.velocity = Vec.of(0,8,0); // current velocity
         
         this.ball_radius = 1;
         this.min_vel_possible_before_zero = 0.0001;
         this.min_vel_for_bounce = 0.05;
-        this.bounce_damping_constant = 0.6;
+        this.bounce_damping_constant = 0.4;
 
         // Map Objects (static)
         this.map_objs = [
@@ -110,7 +119,7 @@ class Scene extends Scene_Component
                 this.add_force(this.piston_vec[i]); //apply force of that piston
             }
         }
-        console.log("tried pushing "+this.piston_vec[0]);
+        //console.log("tried pushing "+this.piston_vec[0]);
     }
     piston_function( x ){
         if (x > 6){
@@ -184,7 +193,7 @@ class Scene extends Scene_Component
             dont_flip_x_dir_sign = 1;
             dont_flip_y_dir_sign = -1;
             this.y = ball_vel_y < 0 ? map_obj.max_y + this.ball_radius : map_obj.min_y - this.ball_radius;
-            console.log("overlap bot");
+            //console.log("overlap bot");
           }
         // BOUNCE to DOWN: Top of ball is overlapping
         else if (top_overlap && !bottom_overlap && ball_vel_y > 0 && !object_front_back &&
@@ -193,7 +202,7 @@ class Scene extends Scene_Component
             dont_flip_x_dir_sign = 1;
             dont_flip_y_dir_sign = -1;
             this.y = ball_vel_y < 0 ? map_obj.max_y + this.ball_radius : map_obj.min_y - this.ball_radius;
-            console.log("overlap top");
+            //console.log("overlap top");
           }
         // BOUNCE to the RIGHT: Left of ball is overlapping
         else if (left_overlap && !right_overlap && !object_front_back &&
@@ -202,7 +211,7 @@ class Scene extends Scene_Component
             dont_flip_x_dir_sign = -1;
             dont_flip_y_dir_sign = 1;
             this.x = ball_vel_x < 0 ? map_obj.max_x + this.ball_radius : map_obj.min_x - this.ball_radius;
-            console.log("overlap left");
+            //console.log("overlap left");
           }
         // BOUNCE to the LEFT: Right of ball is overlapping
         else if (right_overlap && !left_overlap && !object_front_back &&
@@ -211,7 +220,7 @@ class Scene extends Scene_Component
             dont_flip_x_dir_sign = -1;
             dont_flip_y_dir_sign = 1;
             this.x = ball_vel_x < 0 ? map_obj.max_x + this.ball_radius : map_obj.min_x - this.ball_radius;
-            console.log("overlap right");
+            //console.log("overlap right");
           }
         else // could not collide
           return false;
@@ -229,7 +238,7 @@ class Scene extends Scene_Component
             ball_min_x < piston_obj.center[0]+1 && ball_max_x > piston_obj.center[0]-1){
             this.piston_vec[index] = piston_obj.direction;
             this.current_pistons[index] = 1; 
-            console.log(piston_obj);
+            //console.log(piston_obj);
         } else {
             this.piston_vec[index] = Vec.of(0,0,0);
             this.current_pistons[index] = 0;
@@ -251,7 +260,7 @@ class Scene extends Scene_Component
           {
             this.reset();
             this.green_flash = 1;
-            console.log("hit goal");
+            //console.log("hit goal");
           }
         else // could not collide
           return false;   
@@ -272,7 +281,7 @@ class Scene extends Scene_Component
           {
             this.reset();
             this.red_flash = 1;
-            console.log("hit bad block");
+            //console.log("hit bad block");
           }
         else // could not collide
           return false;   
@@ -324,8 +333,8 @@ class Scene extends Scene_Component
         this.py = 0;
         this.x_last = 0; 
         this.y_last = 0; 
-        this.vi = Vec.of(0,1,0); 
-        this.velocity = Vec.of(0,0,0); 
+        this.vi = Vec.of(0,8,0); 
+        this.velocity = Vec.of(0,8,0); 
     }
     //////////////////////////////////////////////////////////
     // Buttons
@@ -334,6 +343,9 @@ class Scene extends Scene_Component
         this.key_triggered_button( "flip2", [ "d" ], this.flip2 );
         this.key_triggered_button( "piston", [ "w" ], this.piston_push );
         this.key_triggered_button( "reset", ["r"], this.reset );
+
+        this.result_img = this.control_panel.appendChild( Object.assign( document.createElement( "img" ), 
+                { style:"width:200px; height:" + 200 * this.aspect_ratio + "px" } ) );
       }
     //////////////////////////////////////////////////////////
     // Draw Objects
@@ -425,6 +437,11 @@ class Scene extends Scene_Component
        
         //update camera
         this.update_camera(graphics_state, ball_transform);
+
+        //this.scratchpad_context.drawImage( this.webgl_manager.canvas, 0, 0, 256, 256 );
+        //this.texture.image.src = this.result_img.src = this.scratchpad.toDataURL("image/png");
+                                        // Clear the canvas and start over, beginning scene 2:
+        //this.webgl_manager.gl.clear( this.webgl_manager.gl.COLOR_BUFFER_BIT | this.webgl_manager.gl.DEPTH_BUFFER_BIT);
       }
   }
 

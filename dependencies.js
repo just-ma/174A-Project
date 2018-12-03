@@ -38,7 +38,7 @@ class Goal_GameObject
     this.min_x = this.center[0] - 1;
     this.max_y = this.center[1] + 1;
     this.min_y = this.center[1] - 1;
-    console.log(this.max_x, this.min_x, this.max_y, this.min_y);
+    //console.log(this.max_x, this.min_x, this.max_y, this.min_y);
 
     this.model_transform = Mat4.identity().times( Mat4.translation(position) );
   }
